@@ -370,15 +370,15 @@ const INFO={
 'ENG19':{n:'DAU/MAU 粘性比率',u:'% · 比值（同层级）',d:'昨日 DAU ÷ 滚 28 日 MAU（同一活跃层级内相除）：月活用户中平均每天回来的比例。20% ≈ 月活用户平均每周用 1.4 天。',c:'分子分母必须同层级（A4 的 DAU ÷ A4 的 MAU）；与 WAU/MAU 互补——WAU/MAU 看周节奏，DAU/MAU 看日粘性；健身产品天然低于社交产品，看趋势别对标外部绝对值。'},
 'ENG16':{n:'分 App 类活跃',u:'账号 · UV · 类间可重叠',d:'{DAU/WAU} × app_category：身体运动 PHYSICAL / 桌面参与 DESK / 语音把玩 AMBIENT。',c:'非 MECE——同一账号可同日用多类 App，各类分别去重；只有 PHYSICAL 计入 A3 与有效训练。'},
 'ENG15':{n:'静默账号',u:'账号 · UV',d:'近 28 天无任何 A1 开机的已激活账号。',c:'设备还在用户家里——是可召回资产，不是流失定论。'},
-'RET01':{n:'周 Cohort 留存率',u:'% · 账号 UV',d:'按首次绑定激活的 ISO 周分组，第 n 周内有过活跃的账号占比（区间留存）。看板可切四个维度：开机 A1 / 联网 A2 / 应用 A3 / 训练 A4（D39），默认训练留存。',c:'≠ 第 n 天当天留存（D1/D7/D30 精确日留存已退役，周粒度足够）；样本 <100 账号的格子灰显不作判断。'},
-'RET02':{n:'月 Cohort 留存率',u:'% · 账号 UV',d:'按激活月分组的区间留存，2026-04 起。',c:''},
+'RET01':{n:'周同期群留存率（Cohort）',u:'% · 账号 UV',d:'按首次绑定激活的 ISO 周分组，第 n 周内有过活跃的账号占比（区间留存）。看板可切四个维度：开机 A1 / 联网 A2 / 应用 A3 / 训练 A4（D39），默认训练留存。',c:'≠ 第 n 天当天留存（D1/D7/D30 精确日留存已退役，周粒度足够）；样本 <100 账号的格子灰显不作判断。'},
+'RET02':{n:'月同期群留存率（Cohort）',u:'% · 账号 UV',d:'按激活月分组的区间留存，2026-04 起。',c:''},
 'RET04':{n:'Quick Ratio',u:'比值 · 账号 UV',d:'(新增活跃 + 复活) ÷ 流失，周/月两粒度。',c:'总量在涨它也可能逼近 1——那说明增长全靠新销量填流失的坑。<1 = 净流失。'},
 'RET05':{n:'复活率',u:'% · 账号 UV',d:'沉默 ≥28 天的账号中本期回归的比例。',c:'配合看复活后 4 周留存——复活即再沉默说明召回只是打扰。'},
 'RET08':{n:'首周训练次数分布',u:'账号占比 % · UV',d:'激活后 7 天内完成的有效训练次数直方（0/1/2/3/4/5+），近 8 个激活 cohort 合并。',c:'RET06 是它的"≥2 次"汇总读数；0 次桶 = 激活即沉默，是 onboarding 干预名单入口。'},
 'RET06':{n:'首周 ≥2 次占比',u:'% · 账号 UV',d:'激活后 7 天内完成 ≥2 次有效训练（仅身体运动类）的账号占比——Aha 前导指标（D30）。',c:'阈值原为 3 次，2026-08-18 调整为 2 次——趋势图上打口径变更标注。'},
 'TRN03':{n:'完成率',u:'% · 课次 PV',d:'完成次数 ÷ 开始次数，按时长课型和单课分别看。',c:'分母是"次"不是"人"；点开 10 秒就退也计入开始。'},
-'TRN06':{n:'Time to First Workout',u:'天 · 账号 UV',d:'首次绑定 → 首次有效训练的时长，报中位数。',c:'长尾看 P90；>7 天未开练的账号是 onboarding 干预对象。'},
-'TRN08':{n:'时长课型 Mix',u:'课次占比 · PV',d:'长课（>15 分钟）/小课（5～15 分钟，含两端）/短练（<5 分钟）的课次结构占比。字段 workout_length_type：long/short/mini（内容侧逐课打标，D37）。',c:'三类课不等价，禁止简单加总课次做 KPI；合并视角用时长/组数加权；原拟字段名 workout_type 已被「课程类型」占用。'},
+'TRN06':{n:'首次训练耗时（TTFW）',u:'天 · 账号 UV',d:'首次绑定 → 首次有效训练的时长，报中位数。',c:'长尾看 P90；>7 天未开练的账号是 onboarding 干预对象。'},
+'TRN08':{n:'时长课型占比',u:'课次占比 · PV',d:'长课（>15 分钟）/小课（5～15 分钟，含两端）/短练（<5 分钟）的课次结构占比。字段 workout_length_type：long/short/mini（内容侧逐课打标，D37）。',c:'三类课不等价，禁止简单加总课次做 KPI；合并视角用时长/组数加权；原拟字段名 workout_type 已被「课程类型」占用。'},
 'TRN09':{n:'深度训练占比',u:'% · 次 PV',d:'单次完成 ≥2 完整组、或完整完成一节课程（任意时长课型）的训练 ÷ 全部有效训练。',c:'原口径「≥2 组且 ≥5 分钟」与短练（<5 分钟）课型冲突，已修订（D41）；有效训练门槛低（1 组或 1 分钟）是刻意的——质量靠本指标分层，不靠门槛。'},
 'TRN10':{n:'组完成率',u:'% · 组 PV',d:'完成组数（TRN22）÷ 训练组数（TRN21）。',c:'与 TRN03 完成率分开：TRN03 按课次、TRN10 按组；过低 = 动作/难度在劝退。'},
 'TRN21':{n:'训练组数（应练）',u:'组/周 · PV',d:'所练课程的结构组数（dim_content.set_count）× 课次 折算的应练组数。',c:'折算口径（R22）：精确口径需 set_started 埋点；跳绳按跳绳段、One Set 按组天然适配。'},
@@ -386,7 +386,7 @@ const INFO={
 'TRN20':{n:'人均实际使用时长',u:'分钟/账号/周 · PV÷UV',d:'周实际训练总分钟 ÷ 周训练活跃账号（A4）。客观读数，不论时长课型。',c:'均值被重度用户拉高——配 TRN24 分布一起读；与「课程设计时长」无关，是真实发生的分钟。'},
 'TRN23':{n:'人均 AI 训练时长',u:'分钟/账号/周 · PV÷UV',d:'开启 AI 识别跟练的会话时长（ai_active_sec）÷ 周训练活跃账号。',c:'是「用到核心能力」的读数——TRN20 与 TRN23 的差 = 非 AI 跟练部分；也是会员 AI 时长权益的用量基础。'},
 'TRN24':{n:'周人均时长分布',u:'账号占比 % · UV',d:'周训练活跃账号按周实际训练分钟分桶：<15 / 15–30 / 30–60 / 60–120 / ≥120。',c:'分布是主读数、均值是速览——TRN04/05/12 三个均值指标退役的原因（D41）。'},
-'TRN13':{n:'连续周 Streak',u:'周 · 账号 UV',d:'连续每周 ≥1 次有效训练的周数。',c:'断一周即清零；Streak ≥8 周的用户几乎不流失。'},
+'TRN13':{n:'连续训练周数（Streak）',u:'周 · 账号 UV',d:'连续每周 ≥1 次有效训练的周数。',c:'断一周即清零；Streak ≥8 周的用户几乎不流失。'},
 'TRN14':{n:'内容库消耗率',u:'% · 账号 UV',d:'账号已练过的课程 ÷ 可用课程库（分 CN/INTL 内容库）。',c:'>70% 的高消耗用户是会员流失的头号先行信号。'},
 'TRN16':{n:'自填负荷覆盖率',u:'% · 组记录 PV',d:'带用户自填负荷的组记录占比。',c:'设备无阻力传感器——volume/强度进步只覆盖此子集，为自报口径。'},
 'SUB01':{n:'会员状态分布',u:'账号 · UV 日快照',d:'FREE（无设备）/ PLUS（绑过设备，终身免费）/ PRO_GIFT（赠送期）/ PRO_PAID（自费）。',c:'Plus 随设备自动获得且随账号终身保留——它不是付费转化指标。'},
@@ -473,8 +473,8 @@ ret:`
 <button data-rd="a1" class="${RDIM==='a1'?'on':''}">开机留存</button><button data-rd="a2" class="${RDIM==='a2'?'on':''}">联网留存</button><button data-rd="a3" class="${RDIM==='a3'?'on':''}">应用留存</button><button data-rd="a4" class="${RDIM==='a4'?'on':''}">训练留存</button></span></div>
 <p class="sub" style="margin:0">第 n 周/月「留存」= 该周期内仍有对应层级活跃：开机 A1 / 联网 A2 / 应用会话 A3 / 有效训练 A4。层级嵌套 ⇒ 同一 cohort 恒有 开机 ≥ 联网 ≥ 应用 ≥ 训练，属正常形态（D36）。默认 = <b>训练留存</b>（口径最严，最接近价值兑现）。当前：<b>${RDIMS[RDIM].n}</b></p></div>
 <div class="grid g2">
- <div class="card"><h3>周 Cohort · ${RDIMS[RDIM].n}留存（RET01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = 留存率 %（账号 UV）。样本 &lt;100 账号灰显。</p><figure><div id="c_coh"></div><figcaption><b>关键观察点：W2 / W3 / W4 / W8</b>（D30）。周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
- <div class="card"><h3>月 Cohort · ${RDIMS[RDIM].n}留存（RET02）</h3><p class="sub">2026-04 起 · 数字 = 留存率 %（账号 UV）</p><figure><div id="c_cohm"></div><figcaption>Aha 专题已单独成板，见下方「首周训练专题」。</figcaption></figure></div>
+ <div class="card"><h3>周同期群留存 · ${RDIMS[RDIM].n}（RET01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = 留存率 %（账号 UV）。样本 &lt;100 账号灰显。</p><figure><div id="c_coh"></div><figcaption><b>关键观察点：W2 / W3 / W4 / W8</b>（D30）。周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
+ <div class="card"><h3>月同期群留存 · ${RDIMS[RDIM].n}（RET02）</h3><p class="sub">2026-04 起 · 数字 = 留存率 %（账号 UV）</p><figure><div id="c_cohm"></div><figcaption>Aha 专题已单独成板，见下方「首周训练专题」。</figcaption></figure></div>
 </div>
 <div class="sec">首周训练专题（Aha · 固定训练口径，不随上方维度切换）</div>
 <div class="grid g2">
@@ -488,8 +488,8 @@ ret:`
  <div class="card"><h3>Aha 达成率趋势（RET06 · 首周 ≥2 次占比）</h3><p class="sub">按激活周 cohort · %（账号 UV）</p><figure><div id="c_aha"></div><figcaption>阈值原为 3 次，08-18 调整为 2 次（D30）——趋势图打口径变更标注。对照口径 RET07（首周任意 App 交互 ≥2 次）同步埋点，验证「交互 Aha」vs「训练 Aha」谁更预测留存。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>Quick Ratio（RET04 · 周）</h3><figure><div id="c_qr2"></div><figcaption>逼近 1 而总量在涨 = 增长全靠新销量填流失坑。</figcaption></figure></div>
- <div class="card"><h3>Growth Accounting（RET · 本周分量）</h3><table class="dt">
+ <div class="card"><h3>增长质量 Quick Ratio（RET04 · 周）</h3><figure><div id="c_qr2"></div><figcaption>逼近 1 而总量在涨 = 增长全靠新销量填流失坑。</figcaption></figure></div>
+ <div class="card"><h3>增长构成 Growth Accounting（RET · 本周分量）</h3><table class="dt">
   <tr><th>分量</th><th>账号数</th></tr>
   <tr><td>New（新激活且活跃）</td><td>+330 账号</td></tr>
   <tr><td>Resurrected（复活，RET05）</td><td>+85 账号</td></tr>
@@ -499,52 +499,47 @@ ret:`
  </table></div>
 </div>`,
 wk:`
-<div class="grid g4">
- ${kpi('w1','本周有效训练次数','TRN · 次（PV，不去重）· ≥1 完整组或 ≥1 分钟')}
- ${kpi('w2','深度训练占比','TRN09 · %（次 PV）· ≥2 组 或 完整完成一节课（D41 修订）')}
- ${kpi('w3','Time to First Workout','TRN06 · 天（中位数，账号 UV）')}
+<div class="card" style="border-left:3px solid var(--accent)"><p class="note" style="margin:0"><b>定位（D46）</b>：训练行为是我们关注的<b>高质量行为</b>——本 Tab 是主视角；桌面陪伴等应用行为是<b>次要使用行为</b>，其规模与时长见 活跃 ENG Tab（ENG16 分类活跃 / ENG17 桌面参与时长 / ENG18 纯桌面陪伴）。</p></div>
+<div class="grid g4" style="margin-top:14px">
+ ${kpi('w1','本周有效训练次数','TRN01 · 次（PV，不去重）· ≥1 完整组或 ≥1 分钟')}
+ ${kpi('w2','深度训练占比','TRN09 · %（次 PV）· ≥2 组 或 完整完成一节课')}
+ ${kpi('w3','首次训练耗时','TRN06 · 天（中位数，账号 UV）· 激活 → 首次有效训练')}
  ${kpi('w4','首课完成率','TRN07 · %（账号的第一次 session）')}
 </div>
-<div class="sec">① 基础结构 · 课型与完成（TRN08 / TRN03）</div>
+<div class="sec">① 训练分布 · 有训练的人是怎么练的（基数 = 周训练活跃账号）</div>
 <div class="grid g2">
- <div class="card"><h3>时长课型结构 · 每周课次（TRN08 Mix）</h3><p class="sub">单位：课次（PV，不去重）——同一账号多次上课累计</p>${L([{n:'长课 >15 min',c:'--seq6'},{n:'小课 5–15 min',c:'--seq4'},{n:'短练 <5 min',c:'--seq2'}])}<figure><div id="c_mix"></div><figcaption>三类分开统计不加总；观察短练→长课进阶 or 长课→短练退坡。</figcaption></figure></div>
- <div class="card"><h3>完成率（TRN03 · 按时长课型）</h3><p class="sub">完成次 ÷ 开始次（课次 PV 口径）</p><figure><div id="c_comp"></div></figure>
+ <div class="card"><h3>周训练次数分布（不论课型）</h3><p class="sub">横轴 = 本周有效训练次数 · 纵轴 = 账号占比 %（UV）· 剔除 0 次（含 0 次的全量视图见 活跃 Tab ENG12）</p><figure><div id="c_fdist"></div><figcaption id="cap_fdist"></figcaption></figure></div>
+ <div class="card"><h3>时长课型占比 · 每周（TRN08）</h3><p class="sub">纵轴 = 课次占比 %（PV，不去重）· 悬浮看绝对课次</p>${L([{n:'长课 >15 min',c:'--seq6'},{n:'小课 5–15 min',c:'--seq4'},{n:'短练 <5 min',c:'--seq2'}])}<figure><div id="c_mix"></div><figcaption>占比视图看结构迁移：短练→长课 = 进阶，长课→短练 = 退坡；三类不等价、不加总。</figcaption></figure></div>
+</div>
+<div class="sec">② 分应用使用排序（TRN19 · 绝对值 + 占比）</div>
+<div class="grid g2">
+ <div class="card"><h3>分应用训练次数排序（TRN19 · 本周）</h3><p class="sub">按 starts（次 PV）降序 · 标注 = 次数占比 % 与周活跃账号（UV）</p><figure><div id="c_apps"></div><figcaption>训练类 App（Workout / One Set / 跳绳）是主行为；抬头番茄属桌面陪伴（DESK），列入仅作对照。</figcaption></figure></div>
+ <div class="card"><h3>分课型完成率与质量（TRN03）</h3><p class="sub">完成次 ÷ 开始次（课次 PV 口径）</p><figure><div id="c_comp"></div></figure>
  <table class="dt" style="margin-top:10px">
   <tr><th>质量指标</th><th>值</th></tr>
   <tr><td>组完成率（TRN10）</td><td>84%（低 = 太难在劝退）</td></tr>
   <tr><td>首课完成率（TRN07）</td><td>71%</td></tr>
   <tr><td>AI 动作打分均值（TRN18）</td><td>7.8 / 10</td></tr>
-  <tr><td>Streak ≥8 周账号（TRN13）</td><td>285 账号（几乎不流失）</td></tr>
+  <tr><td>连续训练 ≥8 周账号（TRN13）</td><td>285 账号（几乎不流失）</td></tr>
  </table></div>
 </div>
-<div class="sec">② 组数 · 训练组数与完成组数（TRN21 / TRN22 / TRN10）</div>
-<div class="grid g2">
- <div class="card"><h3>每周训练组数 vs 完成组数（TRN21 / TRN22）</h3><p class="sub">单位：组（PV，不去重）· 仅身体运动类</p>${L([{n:'训练组数（应练）',c:'--seq3',line:1},{n:'完成组数',c:'--seq6',line:1}])}<figure><div id="c_sets"></div><figcaption id="cap_sets"></figcaption></figure></div>
- <div class="card"><h3>组口径备忘</h3><table class="dt">
-  <tr><th>项</th><th>约定</th></tr>
-  <tr><td>完整组</td><td>完成即计、组内次数不限（D6）；来源 = set_completed 埋点（‼ 第一优先级新增）</td></tr>
-  <tr><td>训练组数（TRN21）</td><td><b>应练组数</b>：暂以 所练课程结构组数（dim_content.set_count）× 课次 折算；精确口径待 set_started 埋点（<b>R22</b>）</td></tr>
-  <tr><td>完成组数（TRN22）</td><td>Σ set_completed（PV）</td></tr>
-  <tr><td>组完成率（TRN10）</td><td>TRN22 ÷ TRN21——过低 = 课太难在劝退；与 TRN03 完成率（课次口径）分开看，一个看组、一个看课</td></tr>
- </table></div>
-</div>
-<div class="sec">③ 真实时长 · 人均使用与 AI 训练（TRN20 / TRN23 / TRN24）</div>
+<div class="sec">③ 人均指标 · 真实投入（TRN20 / TRN23 / TRN24 / TRN21 / TRN22）</div>
 <div class="grid g2">
  <div class="card"><h3>周人均实际时长（TRN20）与 AI 训练时长（TRN23）</h3><p class="sub">分钟/账号/周 · PV÷UV（分母 = 周训练活跃账号）· 客观读数，不论课型</p>${L([{n:'人均实际使用时长',c:'--seq5',line:1},{n:'其中 AI 训练时长',c:'--seq2',line:1}])}<figure><div id="c_dur"></div><figcaption>AI 训练时长 = 开启 AI 识别跟练的会话时长（ai_active_sec）——「用到核心能力」的读数；两线差 = 非 AI 跟练部分。均值解读需配右侧分布。</figcaption></figure></div>
- <div class="card"><h3>周人均时长分布（TRN24）</h3><p class="sub">横轴 = 周实际训练分钟 · 纵轴 = 账号占比 %（UV）· 本周（周训练活跃账号）</p><figure><div id="c_tdist"></div><figcaption>均值会被重度用户拉高——<b>分布是主读数，均值是速览</b>（这也是 TRN04/05/12 三个均值指标退役的原因，D41）。</figcaption></figure></div>
+ <div class="card"><h3>周人均时长分布（TRN24）</h3><p class="sub">横轴 = 周实际训练分钟 · 纵轴 = 账号占比 %（UV）· 本周（周训练活跃账号）</p><figure><div id="c_tdist"></div><figcaption>均值会被重度用户拉高——<b>分布是主读数，均值是速览</b>（TRN04/05/12 三个均值指标因此退役，D41）。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>分 App 使用统计（TRN19 · 本周）</h3><p class="sub">starts（次 PV）· 括号 = 周活跃账号（UV）· by app_id</p><figure><div id="c_apps"></div><figcaption>时长课型看意图结构，app_id 看单品——跳绳/One Set/抬头番茄各自成块；课程内容排行按应用组织（D34）。</figcaption></figure></div>
- <div class="card"><h3>口径备忘（D33）</h3><table class="dt">
+ <div class="card"><h3>每周训练组数 vs 完成组数（TRN21 / TRN22）</h3><p class="sub">单位：组（PV，不去重）· 仅身体运动类</p>${L([{n:'训练组数（应练）',c:'--seq3',line:1},{n:'完成组数',c:'--seq6',line:1}])}<figure><div id="c_sets"></div><figcaption id="cap_sets"></figcaption></figure></div>
+ <div class="card"><h3>口径备忘（D33 / D45）</h3><table class="dt">
   <tr><th>项</th><th>约定</th></tr>
   <tr><td>时长课型</td><td>课程属性打标（<b>workout_length_type</b>：mini 短练 &lt;5min / short 小课 5–15min 含两端 / long 长课 &gt;15min；原拟 workout_type 已被「课程类型」占用，D37），= 用户<b>意图</b>维度</td></tr>
   <tr><td>实际维度</td><td>实际训练时长 / 完成度，与时长课型<b>正交</b>——"总点长课上不完"与"只上短练完成率高"是两个故事</td></tr>
   <tr><td>完成阈值</td><td>完成度 ≥ 70%（占位，待 R20 定 60/70/80）；&lt;10% = 即点即退</td></tr>
   <tr><td>set 归一化</td><td>1 组 ≈ 1 分钟/10 次——跨 App 跨时长课型的统一度量</td></tr>
-  <tr><td>人均实际时长</td><td>TRN20 · 客观读数，不论时长课型；解读时次数优先于时长</td></tr>
+  <tr><td>组数口径</td><td>训练组数（TRN21）= <b>应练组数</b>：暂以 课程结构组数 × 课次 折算，精确待 set_started 埋点（<b>R22</b>）；完成组数（TRN22）= Σ set_completed；组完成率（TRN10）= TRN22 ÷ TRN21</td></tr>
  </table></div>
 </div>
-<div class="card" style="margin-top:14px"><h3>课程内容 Top / Bottom（TRN14/TRN15 · 按应用组织）</h3>
+<div class="card" style="margin-top:14px"><h3>课程内容 最佳 / 待改进（TRN14 / TRN15 · 按应用组织）</h3>
 <table class="dt"><tr><th>课程</th><th>时长课型</th><th>开始数（次 PV）</th><th>完成率</th><th>复练率（账号 UV）</th></tr>
 <tr><td>全身燃脂 HIIT 25'</td><td>长课</td><td>1,140</td><td>72%</td><td>34%</td></tr>
 <tr><td>核心激活 8'</td><td>小课</td><td>980</td><td>81%</td><td>41%</td></tr>
@@ -757,12 +752,16 @@ function fillCharts(Mfull){
     setKpi('w2','31%',0.6,[27,28,28,29,29,29,30,30,30,31,31,31],'--accent');
     setKpi('w3','1.6 天',null,null,null);
     setKpi('w4','71%',0.5,[68,68,69,69,69,70,70,70,70,71,71,71],'--accent');
-    stackChart(document.getElementById('c_mix'),{labels:wl,series:[
+    stackChart(document.getElementById('c_mix'),{labels:wl,asPct:true,series:[
       {name:'长课',color:'--seq6',data:M.sessW},{name:'小课',color:'--seq4',data:M.sessM},{name:'短练',color:'--seq2',data:M.sessm}]});
     barH(document.getElementById('c_comp'),{labels:['长课','小课','短练'],vals:[68,76,91],color:'--seq4',max:100});
-    barH(document.getElementById('c_apps'),{labels:['Workout 课程','桌面跳绳','One Set','抬头番茄'],
-      vals:[1140,520,690,468],suffix:'',color:'--seq4',max:1300,
-      note:['(586)','(233)','(300)','(468 · DESK)']});
+    {const t=FREQW[R1].slice(1), tot=SUM(t), fd=t.map(v=>Math.round(v/tot*100));
+     barH(document.getElementById('c_fdist'),{labels:['1 次','2 次','3 次','4 次','5+ 次'],vals:fd,color:'--seq4',max:Math.max(...fd)*1.25});
+     document.getElementById('cap_fdist').textContent=`所选末周 ${WK[R1].label}：1–2 次占 ${fd[0]+fd[1]}%——习惯尚未成型的主力池；随右上角时间筛选联动。`;}
+    {const av=[['Workout 课程',1140,586,''],['One Set',690,300,''],['桌面跳绳',520,233,''],['抬头番茄',468,468,' · DESK 对照']];
+     const tot=SUM(av.map(a=>a[1]));
+     barH(document.getElementById('c_apps'),{labels:av.map(a=>a[0]),vals:av.map(a=>a[1]),suffix:'',color:'--seq4',max:1300,
+       note:av.map(a=>`${Math.round(a[1]/tot*100)}% · ${a[2]} 账号${a[3]}`)});}
     lineChart(document.getElementById('c_sets'),{labels:wl,series:[
       {name:'训练组数（应练）',color:'--seq3',data:cut(SETSPLAN)},
       {name:'完成组数',color:'--seq6',data:cut(SETSDONE)}]});
