@@ -151,8 +151,8 @@ a{color:var(--accent);}
   </div>
   <nav class="tabs" id="tabs">
     <button data-t="ov" class="on">总览</button><button data-t="act">激活 <span class="tcode">ACT</span></button>
-    <button data-t="eng">活跃 <span class="tcode">ENG</span></button><button data-t="ret">留存 <span class="tcode">RET</span></button>
-    <button data-t="wk">训练 <span class="tcode">TRN</span></button><button data-t="mem">会员 <span class="tcode">SUB</span></button><button data-t="dev">设备 <span class="tcode">DEV</span></button><button data-t="doc">口径说明</button>
+    <button data-t="eng">活跃 <span class="tcode">ENG</span></button><button data-t="wk">训练 <span class="tcode">TRN</span></button>
+    <button data-t="ret">留存 <span class="tcode">RET</span></button><button data-t="mem">会员 <span class="tcode">SUB</span></button><button data-t="dev">设备 <span class="tcode">DEV</span></button><button data-t="doc">口径说明</button>
   </nav>
 </div>
 <main id="main"></main>
@@ -184,7 +184,7 @@ for(const k of ['intl','cn']){
   d.proPaid=[]; let p=(k==='intl'?24:11);
   d.newAct.forEach((v,i)=>{p+=Math.round(v*0.055+ (i>6? d.proGift[i]*0.012:0)); p=Math.round(p*0.995); d.proPaid.push(p);});
   d.plus=d.cum.map((c,i)=>Math.max(0,Math.round(c*0.93)-d.proGift[i]-d.proPaid[i])); // 状态互斥：Plus 不含 Pro 在期
-  d.accts=d.cum.map(c=>Math.round(c*0.93)); // 已绑定激活账号（ACT04）＝活跃率分母
+  d.accts=d.cum.map(c=>Math.round(c*0.93)); // 已绑定激活账号（ACT02）＝活跃率分母
   d.sess=d.wau3.map(v=>({W:Math.round(v*1.1),M:Math.round(v*1.6),m:Math.round(v*2.1)}));
 }
 const SUM=a=>a.reduce((x,y)=>x+y,0);
@@ -341,13 +341,13 @@ function spark(host,data,color){
 function rows(id,items){document.getElementById(id).innerHTML=items.map(r=>`<div class="krow"><span class="kl">${r[0]}<small>${r[1]}</small></span><span class="kv">${r[2]}</span>${r[3]!=null?`<span class="delta ${r[3]>=0?'up':'down'}">${r[3]>=0?'▲':'▼'} ${Math.abs(r[3]).toFixed(1)}%</span>`:''}</div>`).join('');}
 /* ---------- page assembly ---------- */
 const INFO={
-'ACT01':{n:'累计配对激活设备',u:'台 · 设备 UV',d:'历史上首次完成绑定激活的设备累计数，一台终身只计一次（gross 口径）。',c:'≠ App 注册数（那是账号）；≠ 售出台数（sell-through，二期接 Shopify）；重置/换绑不重复计。'},
-'ACT02':{n:'新增激活设备',u:'台/周 · 设备 UV',d:'按首次绑定日归属的新激活设备数。',c:'换绑/二手转让不算新增。'},
-'ACT03':{n:'App 注册账号数',u:'账号 · UV',d:'完成 App 账号注册即计，可能尚未购买/绑定设备。',c:'与设备激活是两条曲线，高度相关但不相等。'},
-'ACT04':{n:'已绑定激活账号数',u:'账号 · UV',d:'历史上完成过 ≥1 台 ATOM 首绑的账号。',c:'是留存 cohort 与会员渗透率的统一分母。'},
+'ACT03':{n:'累计配对激活设备',u:'台 · 设备 UV',d:'历史上首次完成绑定激活的设备累计数，一台终身只计一次（gross 口径）。',c:'≠ App 注册数（那是账号）；≠ 售出台数（sell-through，二期接 Shopify）；重置/换绑不重复计。'},
+'ACT04':{n:'新增激活设备',u:'台/周 · 设备 UV',d:'按首次绑定日归属的新激活设备数。',c:'换绑/二手转让不算新增。'},
+'ACT01':{n:'App 注册账号数',u:'账号 · UV',d:'完成 App 账号注册即计，可能尚未购买/绑定设备。',c:'与设备激活是两条曲线，高度相关但不相等。'},
+'ACT02':{n:'已绑定激活账号数',u:'账号 · UV',d:'历史上完成过 ≥1 台 ATOM 首绑的账号。',c:'是留存 cohort 与会员渗透率的统一分母。'},
 'ACT05':{n:'注册→绑定转化率',u:'% · 账号 UV',d:'App 注册后 7 天内完成首绑的账号占比。',c:'分母是注册账号，不是设备；差值池含"买前研究"与"绑定失败"两种成分。'},
 'ACT06':{n:'户均设备数',u:'台/账号',d:'账号名下已绑定设备的平均数；多机账号占比 = P(≥2 台)。',c:''},
-'ENG01':{n:'三层活跃矩阵',u:'账号 · UV（括号 = 活跃率 %）',d:'{日/周(滚7)/月(滚28)} × {A1 开机/A2 联网/A3 运动}，按 user_id 去重；每格配套活跃率 = ÷ 已绑定激活账号（ACT04 时点基数），R 后缀（如 ENG08R）。',c:'A3 ⊆ A2（上课必须在线）；一个账号多台设备同日只计 1；A1 受离线补传影响近 7 日会回填。'},
+'ENG01':{n:'三层活跃矩阵',u:'账号 · UV（括号 = 活跃率 %）',d:'{日/周(滚7)/月(滚28)} × {A1 开机/A2 联网/A3 运动}，按 user_id 去重；每格配套活跃率 = ÷ 已绑定激活账号（ACT02 时点基数），R 后缀（如 ENG08R）。',c:'A3 ⊆ A2（上课必须在线）；一个账号多台设备同日只计 1；A1 受离线补传影响近 7 日会回填。'},
 'ENG08':{n:'WAU-Workout（NSM-1）',u:'账号/周 · UV',d:'自然滚动 7 日内完成 ≥1 次有效训练的账号数；配套活跃率（ENG08R）= ÷ 已绑定激活账号。基数增长期绝对值永远向上，活跃率才暴露参与度变化——两个都要看。',c:'计人不计次——一人练 10 次也是 1；"周训练总次数"是另一个指标（PV）。'},
 'ENG10':{n:'运动转化率',u:'% · 账号 UV',d:'WAU-A3 ÷ WAU-A1：开机的人里有多少真的练了。',c:'用周窗口算，不是 DAU 比值；低 = 用户被劝退（找课难/内容不合适）。'},
 'ENG13':{n:'周均有效训练次数',u:'次/账号/周 · PV÷UV',d:'总有效训练次数 ÷ 周运动活跃账号数。',c:'均值会被重度用户拉高——判断请看频次分布直方图。'},
@@ -367,7 +367,7 @@ const INFO={
 'TRN16':{n:'自填负荷覆盖率',u:'% · 组记录 PV',d:'带用户自填负荷的组记录占比。',c:'设备无阻力传感器——volume/强度进步只覆盖此子集，为自报口径。'},
 'SUB01':{n:'会员状态分布',u:'账号 · UV 日快照',d:'FREE（无设备）/ PLUS（绑过设备，终身免费）/ PRO_GIFT（赠送期）/ PRO_PAID（自费）。',c:'Plus 随设备自动获得且随账号终身保留——它不是付费转化指标。'},
 'SUB02':{n:'活跃付费 Pro（NSM-2）',u:'账号 · UV',d:'处于自费 Pro 有效期内的账号数。',c:'不含赠送期（赠送是获客成本不是收入）；含已取消但仍在有效期的账号。'},
-'SUB03':{n:'Pro 在期渗透率',u:'% · 账号 UV',d:'（赠送 + 自费 Pro）÷ 已绑定激活账号。',c:'分母是激活账号（ACT04），不是全部 App 注册。'},
+'SUB03':{n:'Pro 在期渗透率',u:'% · 账号 UV',d:'（赠送 + 自费 Pro）÷ 已绑定激活账号。',c:'分母是激活账号（ACT02），不是全部 App 注册。'},
 'SUB04':{n:'付费渗透率',u:'% · 账号 UV',d:'自费 Pro ÷ 已绑定激活账号。',c:'与 SUB03 的差 = 赠送期存量，到期后要么转化要么消失。'},
 'SUB05':{n:'赠送兑换率',u:'% · 账号 UV',d:'已激活的套装赠送权益中，完成兑换的比例（兑换制）。',c:'新增泄漏点：未兑换 = 从未体验过 Pro；兑换有效期窗口待定（R16）。'},
 'SUB06':{n:'赠转付转化率',u:'% · 到期账号 UV',d:'赠送到期后 30 天内转自费的账号比例，按赠送月数(1–12)×SKU 分组。',c:'分母是"已到期"账号，不是全部赠送中账号——在期的还没到判定时点。'},
@@ -395,14 +395,14 @@ function render(){
   const M=pick(PL);
   const sections={
 ov:`
-<div class="card"><h3>业务主漏斗 · 所选周期末累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div><p class="note" style="margin-top:6px"><b>口径</b>：全段均为去重（UV）——注册/训练/付费段 = 账号数，配对激活 = 设备台数；「首次有效训练」<b>计人不计次</b>。售出 → 激活段（ACT90）随二期接入 Shopify 后补齐。</p></div>
+<div class="card"><h3>业务主漏斗 · 所选周期末累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div><p class="note" style="margin-top:6px"><b>口径</b>：全段均为去重（UV）——注册/训练/付费段 = 账号数，配对激活 = 设备台数；「首次有效训练」= 激活后<b>完成过 ≥1 次有效训练</b>（≥1 完整组或 ≥1 分钟）的账号，<b>计人不计次</b>——衡量"开箱后真的练起来了"的人数。售出 → 激活段（ACT90）随二期接入 Shopify 后补齐。</p></div>
 <div class="grid g3" style="margin-top:14px">
- <div class="card"><h3>规模 · 卖得动吗</h3><div id="cl1"></div></div>
- <div class="card"><h3>参与 · 用得住吗</h3><div id="cl2"></div></div>
- <div class="card"><h3>变现 · 愿意付费吗</h3><div id="cl3"></div></div>
+ <div class="card"><h3>用户规模（ACT）</h3><div id="cl1"></div></div>
+ <div class="card"><h3>活跃使用（ENG · RET）</h3><div id="cl2"></div></div>
+ <div class="card"><h3>软件订阅（SUB）</h3><div id="cl3"></div></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><div class="hrow"><h3>三层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（ACT04 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau"></div></figure></div>
+ <div class="card"><div class="hrow"><h3>三层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（ACT02 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau"></div></figure></div>
  <div class="card"><h3>会员结构（周末快照）</h3><p class="sub">单位：账号数（UV 快照，状态互斥：Plus 不含 Pro 在期）</p>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem"></div><figcaption>Plus 随设备终身免费；会员生意的看点在 Pro 两档。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
@@ -411,23 +411,23 @@ ov:`
 </div>`,
 act:`
 <div class="grid g4">
- ${kpi('a1','累计配对激活设备','ACT01 · 台（设备 UV）· gross')}
- ${kpi('a2','本周新增激活','ACT02 · 台/周（设备 UV）')}
- ${kpi('a3','App 注册账号','ACT03 · 账号（UV）')}
+ ${kpi('a1','App 注册账号','ACT01 · 账号（UV）· 软件层')}
+ ${kpi('a2','累计配对激活设备','ACT03 · 台（设备 UV）· gross · 硬件层')}
+ ${kpi('a3','本周新增激活','ACT04 · 台/周（设备 UV）')}
  ${kpi('a4','注册→激活转化(7日)','ACT05 · %（账号 UV）')}
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>每周新增激活（按产品线）</h3><p class="sub">单位：台（设备 UV）</p>${L([{n:'海外',c:'--intl'},{n:'中国',c:'--cn'}])}<figure><div id="c_na"></div></figure></div>
- <div class="card"><h3>累计激活曲线</h3><p class="sub">单位：台（设备 UV）</p>${L([{n:'海外',c:'--intl',line:1},{n:'中国',c:'--cn',line:1}])}<figure><div id="c_cum"></div></figure></div>
-</div>
-<div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>账号注册 → 设备激活漏斗（ACT03 → ACT04 · 转化 ACT05）</h3><p class="sub">绝对值（账号 UV）+ 转化率 · 7 日窗口</p><figure><div id="c_bindfun"></div><figcaption>差值池两种成分：买前先下 App 研究（销售线索）vs 收到货未激活/放弃（开箱问题）。</figcaption></figure></div>
+ <div class="card"><h3>账号注册 → 设备激活漏斗（ACT01 → ACT02 · 转化 ACT05）</h3><p class="sub">绝对值（账号 UV）+ 转化率 · 7 日窗口</p><figure><div id="c_bindfun"></div><figcaption>差值池两种成分：买前先下 App 研究（销售线索）vs 收到货未激活/放弃（开箱问题）。</figcaption></figure></div>
  <div class="card"><h3>激活健康（ACT）</h3><table class="dt">
   <tr><th>指标</th><th>值</th><th>周环比</th></tr>
   <tr><td>户均设备数（ACT06）</td><td>1.08</td><td>—</td></tr>
   <tr><td>多机账号占比</td><td>5.6%</td><td>—</td></tr>
   <tr><td>App 注册→绑定差值池</td><td>≈400 账号</td><td class="note">买前研究 61% / 绑定失败 39%</td></tr>
  </table><p class="note" style="margin-top:8px"><b>二期指标</b>（待 Shopify + 销售手工报表接入）：激活率 ACT90、激活时延 ACT91、已售未激活池 ACT92、退货净值 ACT93。一期只展示后台服务器可得数据。</p></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>每周新增激活（按产品线）</h3><p class="sub">单位：台（设备 UV）</p>${L([{n:'海外',c:'--intl'},{n:'中国',c:'--cn'}])}<figure><div id="c_na"></div></figure></div>
+ <div class="card"><h3>累计激活曲线</h3><p class="sub">单位：台（设备 UV）</p>${L([{n:'海外',c:'--intl',line:1},{n:'中国',c:'--cn',line:1}])}<figure><div id="c_cum"></div></figure></div>
 </div>`,
 eng:`
 <div class="card"><h3>3 × 3 活跃矩阵（ENG01–09）</h3><p class="sub">单位：账号数（UV，user_id 去重，PT 日界）</p><div id="mtx"></div></div>
@@ -560,7 +560,7 @@ doc:`
  <table class="dt"><tr><th>层</th><th>性质</th><th>内容</th></tr>
  <tr><td><b>L0 原始事件</b></td><td><b>需埋点/接口</b>，append-only</td><td>开机/心跳/session/组/绑定/会员事件…（埋点状态见字典 A-8.2）</td></tr>
  <tr><td>L1 日快照</td><td>L0 按日展开判定</td><td>agg_user_daily（a1/a2/a3、有效训练判定）· agg_membership_daily（状态机展开）</td></tr>
- <tr><td>L2 计数指标</td><td>count / sum / distinct</td><td>全部绝对值：ACT01…04、ENG 矩阵、TRN 次数组数、SUB 人数</td></tr>
+ <tr><td>L2 计数指标</td><td>count / sum / distinct</td><td>全部绝对值：ACT03…04、ENG 矩阵、TRN 次数组数、SUB 人数</td></tr>
  <tr><td><b>L3 比率/复合</b></td><td><b>两个 L2 的商</b>，无独立数据源</td><td>全部率（R 后缀/转化/留存/渗透/完成）、Quick Ratio、tenure、Mix</td></tr></table>
  <p class="note" style="margin-top:8px">校验路径：数字可疑时从 L3 拆回 L2 分子分母，再拆回 L0 事件重放。<b>关键新增埋点</b>：set_completed（★第一优先级）、device_binding_event（绑定历史流）、membership_event 扩展（gift_redeem / entitlement_source / gift_months）。</p></div>
  <div class="card"><h3>维度分类（三类，别混）</h3>
@@ -608,10 +608,12 @@ function fillCharts(Mfull){
     document.getElementById('funnel').innerHTML=f.map((s,i)=>
       `<div class="fstage"><div class="n">${s[0]}</div><div class="v">${fmt(s[1])}</div><div class="r">${s[2]||'&nbsp;'}</div><div class="bar"><i style="width:${Math.round(s[1]/f[0][1]*100)}%"></i></div></div>`).join('');
     const act10=Math.round(last(M.wau3)/last(M.wau1)*100);
-    rows('cl1',[['累计配对激活设备','ACT01 · gross · 台（设备 UV）',fmt(last(M.cum)),wow(M.cum)],
-      ['本周新增激活','ACT02 · 台/周（设备 UV）',fmt(last(M.newAct)),wow(M.newAct)],
-      ['App 注册 → 设备激活转化','ACT05 · %（账号 UV）· 7 日窗口','78%',-0.6]]);
-    rows('cl2',[['WAU-Workout ★','ENG08R · NSM-1 · 活跃率 %（括号 = 账号 UV）',Math.round(last(M.wau3)/last(M.accts)*100)+`% <span style="font-size:12px;color:var(--muted)">(${fmt(last(M.wau3))})</span>`,wow(M.wau3)],
+    const appRegOv=Math.round(last(M.cum)*1.25);
+    rows('cl1',[['App 注册账号（累计）','ACT01 · 账号（UV）· 软件层',fmt(appRegOv),0.9],
+      ['累计配对激活设备','ACT03 · gross · 台（设备 UV）· 硬件层',fmt(last(M.cum)),wow(M.cum)],
+      ['本周新增激活','ACT04 · 台/周（设备 UV）',fmt(last(M.newAct)),wow(M.newAct)],
+      ['注册 → 设备激活转化','ACT05 · %（账号 UV）· 7 日窗口','78%',-0.6]]);
+    rows('cl2',[['WAU-Workout ★','ENG08 · NSM-1 · 账号/周（UV）· 括号 = 活跃率',fmt(last(M.wau3))+`<span style="font-size:12px;color:var(--muted)"> (${Math.round(last(M.wau3)/last(M.accts)*100)}%)</span>`,wow(M.wau3)],
       ['运动转化率 A3/A1','ENG10 · %（账号 UV）',act10+'%',0.4],
       ['W4 运动留存','RET01 · %（账号 UV）· 最新周 cohort','58%',0.8],
       ['Quick Ratio','RET04 · 比值（账号 UV）',last(QRs).toFixed(2),null]]);
@@ -636,10 +638,10 @@ function fillCharts(Mfull){
     ].map(a=>`<div class="alert"><span class="ic">${a[0]}</span><span>${a[1]}</span></div>`).join('');
   }
   if(TAB==='act'){
-    setKpi('a1',fmt(last(M.cum)),wow(M.cum),M.cum,'--accent');
-    setKpi('a2',fmt(last(M.newAct)),wow(M.newAct),M.newAct,'--accent');
     const appReg=M.cum.map(v=>Math.round(v*1.25));
-    setKpi('a3',fmt(last(appReg)),wow(appReg),appReg,'--accent');
+    setKpi('a1',fmt(last(appReg)),wow(appReg),appReg,'--accent');
+    setKpi('a2',fmt(last(M.cum)),wow(M.cum),M.cum,'--accent');
+    setKpi('a3',fmt(last(M.newAct)),wow(M.newAct),M.newAct,'--accent');
     setKpi('a4','78%',-0.6,[80,80,81,80,79,79,80,79,79,78,78,78],'--accent');
     stackChart(document.getElementById('c_na'),{labels:wl,series:[
       {name:'海外',color:'--intl',data:PL==='cn'?wl.map(()=>0):cut(D.intl.newAct)},
@@ -650,7 +652,7 @@ function fillCharts(Mfull){
     const aReg=Math.round(last(M.cum)*1.25);
     barH(document.getElementById('c_bindfun'),{labels:['App 注册账号','7 日内完成激活','累计已激活账号'],
       vals:[aReg,Math.round(aReg*0.78),last(M.accts)],suffix:'',color:'--seq4',
-      note:['ACT03 · 基准','ACT05 = 78%','ACT04']});
+      note:['ACT01 · 基准','ACT05 = 78%','ACT02']});
   }
   if(TAB==='eng'){
     const rows=[['A1 开机','--a1',M.wau1,1.28,.60],['A2 联网','--a2',M.wau2,1.27,.61],['A3 运动','--a3',M.wau3,1.42,.62]];
@@ -658,7 +660,7 @@ function fillCharts(Mfull){
     const cell=v=>`${Math.round(v/base*100)}% <span class="note">(${fmt(v)})</span>`;
     document.getElementById('mtx').innerHTML='<table class="dt"><tr><th></th><th>DAU（昨日）</th><th>WAU（滚 7 日）</th><th>MAU（滚 28 日）</th><th>WAU/MAU</th></tr>'+
       rows.map(r=>`<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${cvar(r[1])};margin-right:6px"></span>${r[0]}${r[0]==='A3 运动'?' <b style="color:var(--accent)">← NSM</b>':''}</td><td>${cell(Math.round(last(r[2])/2.6))}</td><td>${cell(last(r[2]))}</td><td>${cell(Math.round(last(r[2])*r[3]))}</td><td>${pct(r[4])}</td></tr>`).join('')+
-      `<tr><td class="note" colspan="5">每格 = 活跃率（括号内为账号数）· 活跃率 = ÷ 已绑定激活账号 ${fmt(base)}（ACT04 时点基数）</td></tr></table>`;
+      `<tr><td class="note" colspan="5">每格 = 活跃率（括号内为账号数）· 活跃率 = ÷ 已绑定激活账号 ${fmt(base)}（ACT02 时点基数）</td></tr></table>`;
     const rateify=a=>a.map((v,i)=>+(v/M.accts[i]*100).toFixed(1));
     const wser=(nm,c,a)=>({name:nm,color:c,data:AMODE==='rate'?rateify(a):a});
     lineChart(document.getElementById('c_wau2'),{labels:wl,series:[
