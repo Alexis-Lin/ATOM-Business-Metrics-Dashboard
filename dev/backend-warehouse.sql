@@ -301,6 +301,17 @@ WITH wau AS (
 )
 SELECT wau.n::NUMERIC / NULLIF(base.n, 0) AS eng08r FROM wau, base;
 
+-- ENG19 DAU/MAU 粘性比率（D40 · 同一层级相除，示例 A4；A1–A3 同形）
+WITH dau AS (
+  SELECT COUNT(DISTINCT user_id) AS n FROM agg_user_daily
+  WHERE account_edition = :edition AND a4_workout_active AND pt_date = :as_of_date
+), mau AS (
+  SELECT COUNT(DISTINCT user_id) AS n FROM agg_user_daily
+  WHERE account_edition = :edition AND a4_workout_active
+    AND pt_date > :as_of_date - INTERVAL '28 days' AND pt_date <= :as_of_date
+)
+SELECT dau.n::NUMERIC / NULLIF(mau.n,0) AS eng19_dau_mau FROM dau, mau;
+
 -- ENG18 桌面陪伴缺口 = A3 − A4（当日应用活跃但未训练的账号数）
 SELECT pt_date,
        COUNT(DISTINCT CASE WHEN a3_app_active AND NOT a4_workout_active THEN user_id END) AS eng18_desk_gap
