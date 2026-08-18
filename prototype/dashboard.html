@@ -44,6 +44,14 @@ body{margin:0; background:var(--page); color:var(--ink);
 .seg button{border:0; background:transparent; color:var(--ink2); padding:5px 14px; font-size:13px; cursor:pointer;}
 .seg button.on{background:var(--accent); color:#fff; font-weight:600;}
 .seg button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+.fbar{max-width:1240px; margin:0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 0;}
+.fbar .flab{font-size:11px; color:var(--muted); letter-spacing:.05em;}
+.fbar select{background:var(--surface); color:var(--ink); border:1px solid var(--grid); border-radius:7px;
+  padding:4px 8px; font-size:12.5px; font-family:inherit;}
+.fbar select:focus-visible{outline:2px solid var(--accent); outline-offset:-1px;}
+.fbar .div{width:1px; height:20px; background:var(--grid);}
+.fchip{margin-left:auto; font-size:12px; color:var(--ink2); background:var(--surface);
+  border:1px solid var(--grid); border-radius:99px; padding:3px 12px; font-variant-numeric:tabular-nums;}
 .tabs{max-width:1240px; margin:0 auto; display:flex; gap:2px; overflow-x:auto;}
 .tabs button{border:0; background:transparent; color:var(--ink2); padding:9px 14px; font-size:13.5px;
   cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;}
@@ -109,10 +117,28 @@ a{color:var(--accent);}
 <div class="top">
   <div class="top-row">
     <span class="brand">Atom 业绩看板<small>原型 · 模拟数据</small></span>
-    <span class="seg" id="plSeg" role="group" aria-label="产品线筛选">
-      <button data-pl="all" class="on">全部</button><button data-pl="intl">国际版</button><button data-pl="cn">中国版</button>
-    </span>
     <span class="fresh"><span class="dot"></span>数据截至 2026-08-17（PT）｜开机活跃近 7 日未定稿</span>
+  </div>
+  <div class="fbar">
+    <span class="flab">地区</span>
+    <span class="seg" id="plSeg" role="group" aria-label="地区筛选">
+      <button data-pl="all" class="on">全球</button><button data-pl="intl">海外</button><button data-pl="cn">中国</button>
+    </span>
+    <select id="ctrySel" class="hide" aria-label="国家筛选">
+      <option value="all">全部国家</option><option value="us">美国</option><option value="jp">日本</option>
+      <option value="de">德国</option><option value="uk">英国</option><option value="other">其他</option>
+    </select>
+    <span class="div"></span>
+    <span class="flab">时间</span>
+    <span class="seg" id="trSeg" role="group" aria-label="时间范围">
+      <button data-tr="4w">近 4 周</button><button data-tr="12w">近 12 周</button><button data-tr="q3">本季度</button><button data-tr="all" class="on">全部</button><button data-tr="custom">自定义</button>
+    </span>
+    <span id="custRange" class="hide">
+      <select id="wFrom" aria-label="起始周"></select>
+      <span class="flab">→</span>
+      <select id="wTo" aria-label="结束周"></select>
+    </span>
+    <span class="fchip" id="fchip"></span>
   </div>
   <nav class="tabs" id="tabs">
     <button data-t="ov" class="on">总览</button><button data-t="act">激活</button>
@@ -121,7 +147,7 @@ a{color:var(--accent);}
   </nav>
 </div>
 <main id="main"></main>
-<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.1</i> ｜ 图内编号（ACT-08、SUB-06…）对应数据字典 v1.1 条目；标注"二期"的模块待外部接口。颜色约定：国际版=蓝 · 中国版=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
+<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.1</i> ｜ 图内编号（ACT-08、SUB-06…）对应数据字典 v1.1 条目；标注"二期"的模块待外部接口。筛选状态见右上角芯片（地区 × 时间范围，全 Tab 共享）。颜色约定：海外=蓝 · 中国=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
 <div class="tt" id="tt"></div>
 
 <script>
@@ -152,8 +178,9 @@ for(const k of ['intl','cn']){
   d.sess=d.wau3.map(v=>({W:Math.round(v*1.1),M:Math.round(v*1.6),m:Math.round(v*2.1)}));
 }
 const SUM=a=>a.reduce((x,y)=>x+y,0);
-function pick(pl){ // returns metric accessor combining regions
-  const g=(f)=>WK.map((_,i)=> pl==='all'? f(D.intl)[i]+f(D.cn)[i] : f(D[pl])[i]);
+function pick(pl){ // returns metric accessor combining regions (+ country share when 海外)
+  const sc=(pl==='intl'&&CTRY!=='all')?CTRY_SHARE[CTRY]:1;
+  const g=(f)=>WK.map((_,i)=> Math.round((pl==='all'? f(D.intl)[i]+f(D.cn)[i] : f(D[pl])[i])*sc));
   return {newAct:g(d=>d.newAct),cum:g(d=>d.cum),wau1:g(d=>d.wau1),wau2:g(d=>d.wau2),wau3:g(d=>d.wau3),
     plus:g(d=>d.plus),proGift:g(d=>d.proGift),proPaid:g(d=>d.proPaid),
     sessW:g(d=>d.sess.map(s=>s.W)),sessM:g(d=>d.sess.map(s=>s.M)),sessm:g(d=>d.sess.map(s=>s.m))};
@@ -303,7 +330,9 @@ function spark(host,data,color){
 
 function rows(id,items){document.getElementById(id).innerHTML=items.map(r=>`<div class="krow"><span class="kl">${r[0]}<small>${r[1]}</small></span><span class="kv">${r[2]}</span>${r[3]!=null?`<span class="delta ${r[3]>=0?'up':'down'}">${r[3]>=0?'▲':'▼'} ${Math.abs(r[3]).toFixed(1)}%</span>`:''}</div>`).join('');}
 /* ---------- page assembly ---------- */
-let PL='all', TAB='ov';
+let PL='all', TAB='ov', CTRY='all', R0=0, R1=NW-1, TR='all';
+const CTRY_SHARE={us:.44,jp:.16,de:.12,uk:.10,other:.18};
+const CTRY_NAME={all:'全部国家',us:'美国',jp:'日本',de:'德国',uk:'英国',other:'其他'};
 const main=document.getElementById('main');
 const L=(items)=>'<div class="legend">'+items.map(i=>`<span class="it"><span class="${i.line?'ln':'sw'}" style="background:${cvar(i.c)}"></span>${i.n}</span>`).join('')+'</div>';
 function kpi(id,label,sub){return `<div class="card kpi"><h3>${label}</h3><p class="sub">${sub||''}</p><div class="val" id="${id}v"></div><div id="${id}s"></div></div>`;}
@@ -312,13 +341,13 @@ function setKpi(id,val,delta,sparkData,color){
   if(sparkData)spark(document.getElementById(id+'s'),sparkData,color);
 }
 const last=a=>a[a.length-1], prev=a=>a[a.length-2];
-const wow=a=>(last(a)-prev(a))/prev(a)*100;
+const wow=a=>a.length<2?0:(last(a)-prev(a))/prev(a)*100;
 
 function render(){
   const M=pick(PL);
   const sections={
 ov:`
-<div class="card"><h3>业务主漏斗 · 本季累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div><p class="note" style="margin-top:6px">售出 → 激活段（激活率 REG-08）随二期接入 Shopify/销售报表后补齐；一期漏斗起点为 App 注册。</p></div>
+<div class="card"><h3>业务主漏斗 · 所选周期末累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div><p class="note" style="margin-top:6px">售出 → 激活段（激活率 REG-08）随二期接入 Shopify/销售报表后补齐；一期漏斗起点为 App 注册。</p></div>
 <div class="grid g3" style="margin-top:14px">
  <div class="card"><h3>规模 · 卖得动吗</h3><div id="cl1"></div></div>
  <div class="card"><h3>参与 · 用得住吗</h3><div id="cl2"></div></div>
@@ -465,8 +494,11 @@ dev:`
   main.innerHTML=sections[TAB];
   fillCharts(M);
 }
-function fillCharts(M){
-  const wl=WK.map(w=>w.label);
+function fillCharts(Mfull){
+  const cut=a=>a.slice(R0,R1+1);
+  const M={}; for(const k in Mfull) M[k]=cut(Mfull[k]);
+  const QRs=cut(QR);
+  const wl=WK.slice(R0,R1+1).map(w=>w.label);
   if(TAB==='ov'){
     const appReg=Math.round(last(M.cum)*1.25);
     const f=[['App 注册',appReg,null],['配对激活',last(M.cum),'转化 80%'],['首次有效训练',Math.round(last(M.cum)*.81),'81%'],
@@ -481,7 +513,7 @@ function fillCharts(M){
     rows('cl2',[['WAU-Workout ★','ACT-08 · NSM-1',fmt(last(M.wau3)),wow(M.wau3)],
       ['运动转化率 A3/A1','ACT-10',act10+'%',0.4],
       ['W4 运动留存','RET-01 · 最新周 cohort','58%',0.8],
-      ['Quick Ratio','RET-04 · 活跃盘',last(QR).toFixed(2),null]]);
+      ['Quick Ratio','RET-04 · 活跃盘',last(QRs).toFixed(2),null]]);
     rows('cl3',[['活跃付费 Pro ★','SUB-02 · NSM-2 · 不含赠送',fmt(last(M.proPaid)),wow(M.proPaid)],
       ['付费渗透率','SUB-04',(last(M.proPaid)/last(M.cum)*100).toFixed(1)+'%',0.3],
       ['赠送兑换率','SUB-05','87%',1.0],
@@ -492,9 +524,9 @@ function fillCharts(M){
     stackChart(document.getElementById('c_mem'),{labels:wl,series:[
       {name:'Plus',color:'--plus',data:M.plus},{name:'Pro 赠送',color:'--progift',data:M.proGift},
       {name:'Pro 付费',color:'--propaid',data:M.proPaid}]});
-    lineChart(document.getElementById('c_qr'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QR.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
+    lineChart(document.getElementById('c_qr'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QRs.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
     document.getElementById('alerts').innerHTML=[
-      ['⚠️','Quick Ratio 连续 6 周下行（1.42 → '+last(QR).toFixed(2)+'）——新增在填流失的坑，关注 Dormant 召回。','warn'],
+      ['⚠️','Quick Ratio 连续 6 周下行（1.42 → '+last(QRs).toFixed(2)+'）——新增在填流失的坑，关注 Dormant 召回。','warn'],
       ['⚠️','中国版 W'+ (33) +' 新增激活环比 −12%，渠道数据待核对。','warn'],
       ['🔴','「肩背矫正 22\'」完成率 48%，显著低于大课均值 70%——建议内容组复盘。','crit'],
       ['✅','固件 v2.5.1 发布后，对应周 cohort W1 留存 +2.1pp。','good']
@@ -506,11 +538,11 @@ function fillCharts(M){
     setKpi('a3','93.1%',0.4,[91.8,92,92.1,92.3,92.4,92.5,92.6,92.8,92.9,93,93,93.1],'--accent');
     setKpi('a4','78%',-0.6,[80,80,81,80,79,79,80,79,79,78,78,78],'--accent');
     stackChart(document.getElementById('c_na'),{labels:wl,series:[
-      {name:'国际版',color:'--intl',data:PL==='cn'?WK.map(()=>0):D.intl.newAct},
-      {name:'中国版',color:'--cn',data:PL==='intl'?WK.map(()=>0):D.cn.newAct}]});
+      {name:'国际版',color:'--intl',data:PL==='cn'?wl.map(()=>0):cut(D.intl.newAct)},
+      {name:'中国版',color:'--cn',data:PL==='intl'?wl.map(()=>0):cut(D.cn.newAct)}]});
     lineChart(document.getElementById('c_cum'),{labels:wl,series:[
-      ...(PL!=='cn'?[{name:'国际版',color:'--intl',data:D.intl.cum}]:[]),
-      ...(PL!=='intl'?[{name:'中国版',color:'--cn',data:D.cn.cum}]:[])],fill:true});
+      ...(PL!=='cn'?[{name:'海外',color:'--intl',data:cut(D.intl.cum)}]:[]),
+      ...(PL!=='intl'?[{name:'中国',color:'--cn',data:cut(D.cn.cum)}]:[])],fill:true});
     barH(document.getElementById('c_bindfun'),{labels:['App 注册','进入配对流程','7 日内绑定成功'],
       vals:[100,86,78],color:'--seq4',max:110,note:['基准','','REG-05']});
   }
@@ -521,17 +553,24 @@ function fillCharts(M){
     lineChart(document.getElementById('c_wau2'),{labels:wl,series:[
       {name:'A1',color:'--a1',data:M.wau1},{name:'A2',color:'--a2',data:M.wau2},{name:'A3',color:'--a3',data:M.wau3}]});
     barH(document.getElementById('c_freq'),{labels:FREQ.labels.map(l=>l+' 次'),vals:FREQ.vals,color:'--seq4'});
-    stackChart(document.getElementById('c_seg'),{labels:SEG.labels,asPct:true,series:[
-      {name:'Power',color:'--seq6',data:SEG.power},{name:'Regular',color:'--seq4',data:SEG.regular},
-      {name:'Light',color:'--seq2',data:SEG.light},{name:'Dormant',color:'--seq1',data:SEG.dormant},
-      {name:'Churned',color:'--grid',data:SEG.churn}]});
+    const s0=Math.max(0,Math.max(R0,8)-8), s1=Math.max(s0,Math.min(R1,19)-8);
+    const segCut=a=>a.slice(s0,s1+1);
+    stackChart(document.getElementById('c_seg'),{labels:SEG.labels.slice(s0,s1+1),asPct:true,series:[
+      {name:'Power',color:'--seq6',data:segCut(SEG.power)},{name:'Regular',color:'--seq4',data:segCut(SEG.regular)},
+      {name:'Light',color:'--seq2',data:segCut(SEG.light)},{name:'Dormant',color:'--seq1',data:segCut(SEG.dormant)},
+      {name:'Churned',color:'--grid',data:segCut(SEG.churn)}]});
     document.getElementById('m_b10').textContent=Math.round(last(M.wau3)/last(M.wau1)*100)+'%';
     document.getElementById('m_b11').textContent=Math.round(last(M.wau2)/last(M.wau1)*100)+'%';
   }
   if(TAB==='ret'){
-    heatmap(document.getElementById('c_coh'),{rows:COH,cols:['W0','W1','W2','W3','W4','W5','W6','W7','W8']});
-    heatmap(document.getElementById('c_cohm'),{rows:COHM,cols:['M0','M1','M2','M3','M4']});
-    lineChart(document.getElementById('c_qr2'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QR.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
+    let cohR=COH.filter(r=>{const n=+r.label.slice(1);return n>=14+R0&&n<=14+R1;});
+    if(!cohR.length)cohR=COH;
+    heatmap(document.getElementById('c_coh'),{rows:cohR,cols:['W0','W1','W2','W3','W4','W5','W6','W7','W8']});
+    const MSTART=[14,18,23,27,31];
+    let cohMR=COHM.filter((r,i)=>MSTART[i]<=14+R1&&(i===4?33:MSTART[i+1]-1)>=14+R0);
+    if(!cohMR.length)cohMR=COHM;
+    heatmap(document.getElementById('c_cohm'),{rows:cohMR,cols:['M0','M1','M2','M3','M4']});
+    lineChart(document.getElementById('c_qr2'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QRs.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
   }
   if(TAB==='wk'){
     setKpi('w1',fmt(SUM([last(M.sessW),last(M.sessM),last(M.sessm)])),2.4,M.sessW.map((v,i)=>v+M.sessM[i]+M.sessm[i]),'--accent');
@@ -581,10 +620,39 @@ function fillCharts(M){
     barH(document.getElementById('c_delay'),{labels:DELAY.labels,vals:DELAY.vals,color:'--seq4',max:70});
   }
 }
+function fchip(){
+  const reg=PL==='all'?'全球':PL==='cn'?'中国':(CTRY==='all'?'海外':'海外 · '+CTRY_NAME[CTRY]);
+  document.getElementById('fchip').textContent=
+    `${reg} · ${WK[R0].label}–${WK[R1].label} · ${R1-R0+1} 周 ｜ 环比 = 末周 vs 前一周`;
+}
+function setRange(tr){
+  TR=tr;
+  if(tr==='4w'){R0=NW-4;R1=NW-1;} else if(tr==='12w'){R0=NW-12;R1=NW-1;}
+  else if(tr==='q3'){R0=13;R1=NW-1;} else if(tr==='all'){R0=0;R1=NW-1;}
+  document.getElementById('custRange').classList.toggle('hide',tr!=='custom');
+  if(tr==='custom'){R0=+document.getElementById('wFrom').value;R1=+document.getElementById('wTo').value;
+    if(R0>R1){[R0,R1]=[R1,R0];}}
+}
+(function initCust(){
+  const f=document.getElementById('wFrom'),t=document.getElementById('wTo');
+  WK.forEach((w,i)=>{f.add(new Option(w.label,i));t.add(new Option(w.label,i));});
+  f.value=0;t.value=NW-1;
+  [f,t].forEach(x=>x.addEventListener('change',()=>{setRange('custom');fchip();render();}));
+})();
 document.getElementById('plSeg').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return;
   document.querySelectorAll('#plSeg button').forEach(x=>x.classList.toggle('on',x===b));
-  PL=b.dataset.pl; render();
+  PL=b.dataset.pl;
+  const cs=document.getElementById('ctrySel');
+  cs.classList.toggle('hide',PL!=='intl');
+  if(PL!=='intl'){CTRY='all';cs.value='all';}
+  fchip();render();
+});
+document.getElementById('ctrySel').addEventListener('change',e=>{CTRY=e.target.value;fchip();render();});
+document.getElementById('trSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#trSeg button').forEach(x=>x.classList.toggle('on',x===b));
+  setRange(b.dataset.tr);fchip();render();
 });
 document.getElementById('tabs').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return;
@@ -592,5 +660,5 @@ document.getElementById('tabs').addEventListener('click',e=>{
   TAB=b.dataset.t; render();
 });
 addEventListener('resize',()=>render());
-render();
+fchip();render();
 </script>
