@@ -436,7 +436,8 @@ FROM fct_session s JOIN dim_app a ON a.app_id = s.app_id
 WHERE s.account_edition = :edition AND s.pt_date BETWEEN :start_date AND :end_date
 GROUP BY s.pt_date, s.app_id, a.app_category;
 
--- TRN21/22/10 组数与组完成率（周粒度，仅 PHYSICAL）
+-- TRN22 完成组数 + TRN10 组完成率（周粒度，仅 PHYSICAL）
+--   D47：只单列完成组数；应练组数（TRN21）仅作分母不展示（R22 折算口径）。
 SELECT DATE_TRUNC('week', pt_date) AS iso_week,
        SUM(planned_set_cnt)                            AS trn21_planned_sets,
        SUM(set_cnt)                                    AS trn22_completed_sets,
@@ -445,10 +446,11 @@ FROM agg_user_daily
 WHERE account_edition = :edition AND pt_date BETWEEN :start_date AND :end_date
 GROUP BY 1;
 
--- TRN20/23 周人均实际时长与 AI 训练时长（分母 = 周训练活跃账号）
+-- TRN20 周人均实际训练时长（分母 = 周训练活跃账号）
+--   注：原 TRN23（AI 训练时长）与本指标高度重合，已合并退役（D47）；
+--   ai_train_minutes 列保留，作会员 AI 时长权益的用量基础（SUB 后置）。
 SELECT DATE_TRUNC('week', pt_date) AS iso_week,
-       SUM(train_minutes)::NUMERIC    / NULLIF(COUNT(DISTINCT CASE WHEN a4_workout_active THEN user_id END),0) AS trn20_min_per_user,
-       SUM(ai_train_minutes)::NUMERIC / NULLIF(COUNT(DISTINCT CASE WHEN a4_workout_active THEN user_id END),0) AS trn23_ai_min_per_user
+       SUM(train_minutes)::NUMERIC / NULLIF(COUNT(DISTINCT CASE WHEN a4_workout_active THEN user_id END),0) AS trn20_min_per_user
 FROM agg_user_daily
 WHERE account_edition = :edition AND pt_date BETWEEN :start_date AND :end_date
 GROUP BY 1;

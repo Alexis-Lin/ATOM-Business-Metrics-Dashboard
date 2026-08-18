@@ -232,7 +232,6 @@ const SEG={labels:WK.slice(8).map(w=>w.label),
 const SETSPLAN=WK.map((_,i)=>Math.round((260+i*30)*(1+(rng(500+i)()-.5)*.1)));   // TRN21 应练组数
 const SETSDONE=SETSPLAN.map((v,i)=>Math.round(v*(0.80+0.003*i)));                 // TRN22 完成组数
 const PUMIN=WK.map((_,i)=>+(31+i*0.45+(rng(520+i)()-.5)*2).toFixed(1));           // TRN20 人均周实际分钟
-const AIMIN=PUMIN.map((v,i)=>+(v*(0.62+0.004*i)).toFixed(1));                     // TRN23 人均 AI 训练分钟
 const TDIST={labels:['<15 分','15–30 分','30–60 分','60–120 分','≥120 分'],vals:[26,31,24,13,6]};
 const FW={labels:['v2.4.0','v2.4.1','v2.5.0','v2.5.1(新)'],vals:[6,14,31,49]};
 const DELAY={labels:['<1 分','1–60 分','1–24 时','1–3 天','3–7 天','>7 天(丢弃)'],vals:[61,17,12,6,3,1]};
@@ -381,10 +380,9 @@ const INFO={
 'TRN08':{n:'时长课型占比',u:'课次占比 · PV',d:'长课（>15 分钟）/小课（5～15 分钟，含两端）/短练（<5 分钟）的课次结构占比。字段 workout_length_type：long/short/mini（内容侧逐课打标，D37）。',c:'三类课不等价，禁止简单加总课次做 KPI；合并视角用时长/组数加权；原拟字段名 workout_type 已被「课程类型」占用。'},
 'TRN09':{n:'深度训练占比',u:'% · 次 PV',d:'单次完成 ≥2 完整组、或完整完成一节课程（任意时长课型）的训练 ÷ 全部有效训练。',c:'原口径「≥2 组且 ≥5 分钟」与短练（<5 分钟）课型冲突，已修订（D41）；有效训练门槛低（1 组或 1 分钟）是刻意的——质量靠本指标分层，不靠门槛。'},
 'TRN10':{n:'组完成率',u:'% · 组 PV',d:'完成组数（TRN22）÷ 训练组数（TRN21）。',c:'与 TRN03 完成率分开：TRN03 按课次、TRN10 按组；过低 = 动作/难度在劝退。'},
-'TRN21':{n:'训练组数（应练）',u:'组/周 · PV',d:'所练课程的结构组数（dim_content.set_count）× 课次 折算的应练组数。',c:'折算口径（R22）：精确口径需 set_started 埋点；跳绳按跳绳段、One Set 按组天然适配。'},
+'TRN21':{n:'应练组数（不单列）',u:'组/周 · PV · 内部分母',d:'所练课程结构组数（dim_content.set_count）× 课次 折算。**不单列展示（D47）**——仅作组完成率 TRN10 的分母。',c:'折算口径（R22）：精确口径需 set_started 埋点。'},
 'TRN22':{n:'完成组数',u:'组/周 · PV',d:'Σ set_completed 事件（仅身体运动类）。',c:'完整组 = 完成即计、组内次数不限（D6）；set_completed 是第一优先级新增埋点。'},
-'TRN20':{n:'人均实际使用时长',u:'分钟/账号/周 · PV÷UV',d:'周实际训练总分钟 ÷ 周训练活跃账号（A4）。客观读数，不论时长课型。',c:'均值被重度用户拉高——配 TRN24 分布一起读；与「课程设计时长」无关，是真实发生的分钟。'},
-'TRN23':{n:'人均 AI 训练时长',u:'分钟/账号/周 · PV÷UV',d:'开启 AI 识别跟练的会话时长（ai_active_sec）÷ 周训练活跃账号。',c:'是「用到核心能力」的读数——TRN20 与 TRN23 的差 = 非 AI 跟练部分；也是会员 AI 时长权益的用量基础。'},
+'TRN20':{n:'人均实际训练时长',u:'分钟/账号/周 · PV÷UV',d:'周实际训练总分钟 ÷ 周训练活跃账号（A4）。客观读数，不论时长课型。',c:'原 TRN23 人均 AI 训练时长与本指标高度重合，已合并退役（D47），ai_active_sec 字段保留作会员权益用量；均值被重度用户拉高——配 TRN24 分布一起读。'},
 'TRN24':{n:'周人均时长分布',u:'账号占比 % · UV',d:'周训练活跃账号按周实际训练分钟分桶：<15 / 15–30 / 30–60 / 60–120 / ≥120。',c:'分布是主读数、均值是速览——TRN04/05/12 三个均值指标退役的原因（D41）。'},
 'TRN13':{n:'连续训练周数（Streak）',u:'周 · 账号 UV',d:'连续每周 ≥1 次有效训练的周数。',c:'断一周即清零；Streak ≥8 周的用户几乎不流失。'},
 'TRN14':{n:'内容库消耗率',u:'% · 账号 UV',d:'账号已练过的课程 ÷ 可用课程库（分 CN/INTL 内容库）。',c:'>70% 的高消耗用户是会员流失的头号先行信号。'},
@@ -523,20 +521,20 @@ wk:`
   <tr><td>连续训练 ≥8 周账号（TRN13）</td><td>285 账号（几乎不流失）</td></tr>
  </table></div>
 </div>
-<div class="sec">③ 人均指标 · 真实投入（TRN20 / TRN23 / TRN24 / TRN21 / TRN22）</div>
+<div class="sec">③ 人均指标 · 真实投入（TRN20 / TRN24 / TRN22）</div>
 <div class="grid g2">
- <div class="card"><h3>周人均实际时长（TRN20）与 AI 训练时长（TRN23）</h3><p class="sub">分钟/账号/周 · PV÷UV（分母 = 周训练活跃账号）· 客观读数，不论课型</p>${L([{n:'人均实际使用时长',c:'--seq5',line:1},{n:'其中 AI 训练时长',c:'--seq2',line:1}])}<figure><div id="c_dur"></div><figcaption>AI 训练时长 = 开启 AI 识别跟练的会话时长（ai_active_sec）——「用到核心能力」的读数；两线差 = 非 AI 跟练部分。均值解读需配右侧分布。</figcaption></figure></div>
+ <div class="card"><h3>周人均实际训练时长（TRN20）</h3><p class="sub">分钟/账号/周 · PV÷UV（分母 = 周训练活跃账号）· 客观读数，不论课型</p><figure><div id="c_dur"></div><figcaption>原「人均 AI 训练时长（TRN23）」与本指标高度重合，已合并退役（D47）；ai_active_sec 字段保留，作会员 AI 时长权益的用量基础。均值解读需配右侧分布。</figcaption></figure></div>
  <div class="card"><h3>周人均时长分布（TRN24）</h3><p class="sub">横轴 = 周实际训练分钟 · 纵轴 = 账号占比 %（UV）· 本周（周训练活跃账号）</p><figure><div id="c_tdist"></div><figcaption>均值会被重度用户拉高——<b>分布是主读数，均值是速览</b>（TRN04/05/12 三个均值指标因此退役，D41）。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>每周训练组数 vs 完成组数（TRN21 / TRN22）</h3><p class="sub">单位：组（PV，不去重）· 仅身体运动类</p>${L([{n:'训练组数（应练）',c:'--seq3',line:1},{n:'完成组数',c:'--seq6',line:1}])}<figure><div id="c_sets"></div><figcaption id="cap_sets"></figcaption></figure></div>
+ <div class="card"><h3>每周完成组数（TRN22）</h3><p class="sub">单位：组（PV，不去重）· 仅身体运动类 · Σ set_completed</p><figure><div id="c_sets"></div><figcaption id="cap_sets"></figcaption></figure></div>
  <div class="card"><h3>口径备忘（D33 / D45）</h3><table class="dt">
   <tr><th>项</th><th>约定</th></tr>
   <tr><td>时长课型</td><td>课程属性打标（<b>workout_length_type</b>：mini 短练 &lt;5min / short 小课 5–15min 含两端 / long 长课 &gt;15min；原拟 workout_type 已被「课程类型」占用，D37），= 用户<b>意图</b>维度</td></tr>
   <tr><td>实际维度</td><td>实际训练时长 / 完成度，与时长课型<b>正交</b>——"总点长课上不完"与"只上短练完成率高"是两个故事</td></tr>
   <tr><td>完成阈值</td><td>完成度 ≥ 70%（占位，待 R20 定 60/70/80）；&lt;10% = 即点即退</td></tr>
   <tr><td>set 归一化</td><td>1 组 ≈ 1 分钟/10 次——跨 App 跨时长课型的统一度量</td></tr>
-  <tr><td>组数口径</td><td>训练组数（TRN21）= <b>应练组数</b>：暂以 课程结构组数 × 课次 折算，精确待 set_started 埋点（<b>R22</b>）；完成组数（TRN22）= Σ set_completed；组完成率（TRN10）= TRN22 ÷ TRN21</td></tr>
+  <tr><td>组数口径</td><td>只跟踪<b>完成组数（TRN22）</b>= Σ set_completed（D47）；应练组数（TRN21）不单列展示，仅作<b>组完成率（TRN10）</b>= TRN22 ÷ TRN21 的分母（课程结构组数 × 课次 折算，精确待 set_started 埋点 <b>R22</b>）</td></tr>
  </table></div>
 </div>
 <div class="card" style="margin-top:14px"><h3>课程内容 最佳 / 待改进（TRN14 / TRN15 · 按应用组织）</h3>
@@ -763,12 +761,10 @@ function fillCharts(Mfull){
      barH(document.getElementById('c_apps'),{labels:av.map(a=>a[0]),vals:av.map(a=>a[1]),suffix:'',color:'--seq4',max:1300,
        note:av.map(a=>`${Math.round(a[1]/tot*100)}% · ${a[2]} 账号${a[3]}`)});}
     lineChart(document.getElementById('c_sets'),{labels:wl,series:[
-      {name:'训练组数（应练）',color:'--seq3',data:cut(SETSPLAN)},
-      {name:'完成组数',color:'--seq6',data:cut(SETSDONE)}]});
-    document.getElementById('cap_sets').textContent=`最新周组完成率（TRN10）= ${Math.round(last(cut(SETSDONE))/last(cut(SETSPLAN))*100)}%；应练组数暂以课程结构组数×课次折算（R22）。`;
+      {name:'完成组数',color:'--seq6',data:cut(SETSDONE)}],fill:true});
+    document.getElementById('cap_sets').textContent=`组完成率（TRN10）= 完成组数 ÷ 应练组数 = ${Math.round(last(cut(SETSDONE))/last(cut(SETSPLAN))*100)}%——应练组数不单列展示，仅作分母（课程结构组数×课次折算，R22）。`;
     lineChart(document.getElementById('c_dur'),{labels:wl,series:[
-      {name:'人均实际使用时长',color:'--seq5',data:cut(PUMIN)},
-      {name:'其中 AI 训练时长',color:'--seq2',data:cut(AIMIN)}],yFmt:v=>Math.round(v)+' 分'});
+      {name:'人均实际训练时长',color:'--seq5',data:cut(PUMIN)}],yFmt:v=>Math.round(v)+' 分',fill:true});
     barH(document.getElementById('c_tdist'),{labels:TDIST.labels,vals:TDIST.vals,color:'--seq4',max:40});
   }
   if(TAB==='mem'){

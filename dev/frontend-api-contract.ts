@@ -123,16 +123,14 @@ export interface TrainingResponse {
     type: WorkoutLengthType;
     series: MetricSeries;
   }>;
-  /** ② 组数（D45）：训练组数（应练，折算口径 R22）/ 完成组数 / 组完成率 */
+  /** 组数（D47）：只单列完成组数；应练组数（TRN21）为服务端内部分母，不出接口 */
   sets: {
-    planned: MetricSeries;           // TRN21
-    completed: MetricSeries;         // TRN22
-    completionRate: MetricSeries;    // TRN10 = TRN22 ÷ TRN21
+    completed: MetricSeries;         // TRN22 = Σ set_completed
+    completionRate: MetricSeries;    // TRN10 = TRN22 ÷ TRN21（分母服务端折算，R22）
   };
-  /** ③ 真实时长（D45）：人均实际/AI 训练时长 + 分布（分布是主读数） */
+  /** 真实时长（D47）：单一人均时长指标 + 分布（分布是主读数）；TRN23 已并入 TRN20 */
   realDuration: {
     perUserMinutes: MetricSeries;    // TRN20（分母 = 周训练活跃账号）
-    aiPerUserMinutes: MetricSeries;  // TRN23（ai_active_sec）
     distribution: Array<{ bucket: '<15' | '15-30' | '30-60' | '60-120' | '>=120'; share: number }>; // TRN24
   };
   perApp: Array<{                    // TRN19 分应用统计
