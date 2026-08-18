@@ -59,6 +59,7 @@ body{margin:0; background:var(--page); color:var(--ink);
 .tabs button{border:0; background:transparent; color:var(--ink2); padding:9px 14px; font-size:13.5px;
   cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;}
 .tabs button.on{color:var(--ink); font-weight:700; border-bottom-color:var(--accent);}
+.tcode{font-size:10px; letter-spacing:.06em; color:var(--accent); border:1px solid color-mix(in srgb,var(--accent) 40%,transparent); border-radius:4px; padding:0 4px; vertical-align:1px;}
 .tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
 main{max-width:1240px; margin:0 auto; padding:18px 20px 72px;}
 .grid{display:grid; gap:14px;}
@@ -149,13 +150,13 @@ a{color:var(--accent);}
     <span class="fchip" id="fchip"></span>
   </div>
   <nav class="tabs" id="tabs">
-    <button data-t="ov" class="on">总览</button><button data-t="act">激活</button>
-    <button data-t="eng">活跃</button><button data-t="ret">留存</button>
-    <button data-t="wk">训练</button><button data-t="mem">会员</button><button data-t="dev">设备健康</button><button data-t="doc">口径说明</button>
+    <button data-t="ov" class="on">总览</button><button data-t="act">激活 <span class="tcode">REG</span></button>
+    <button data-t="eng">活跃 <span class="tcode">ACT</span></button><button data-t="ret">留存 <span class="tcode">RET</span></button>
+    <button data-t="wk">训练 <span class="tcode">TRN</span></button><button data-t="mem">会员 <span class="tcode">SUB</span></button><button data-t="dev">设备 <span class="tcode">DEV</span></button><button data-t="doc">口径说明</button>
   </nav>
 </div>
 <main id="main"></main>
-<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.1</i> ｜ 图内编号（ACT-08、SUB-06…）对应数据字典 v1.1 条目；标注"二期"的模块待外部接口。口径速记：<b>UV</b> = 去重（账号按 user_id / 设备按 device_id），<b>PV</b> = 次数累计不去重；未标注默认 UV-账号，详见「口径说明」Tab。筛选状态见右上角芯片。颜色约定：海外=蓝 · 中国=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
+<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.1</i> ｜ 图内编号（ACT-08、SUB-06…）对应数据字典 v1.1 条目；标注"二期"的模块待外部接口。口径速记：<b>UV</b> = 去重（账号按 user_id / 设备按 device_id），<b>PV</b> = 次数累计不去重；未标注默认 UV-账号，详见「口径说明」Tab。筛选状态见右上角芯片。模块码：REG 注册绑定 · ACT 活跃（定性）· RET 留存 · TRN 训练（定量）· SUB 会员 · DEV 设备。颜色约定：海外=蓝 · 中国=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
 <div class="tt" id="tt"></div>
 
 <script>
@@ -406,8 +407,8 @@ ov:`
  <div class="card"><h3>会员结构（周末快照）</h3><p class="sub">单位：账号数（UV 快照，状态互斥：Plus 不含 Pro 在期）</p>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem"></div><figcaption>Plus 随设备终身免费；会员生意的看点在 Pro 两档。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>Quick Ratio（周）</h3><p class="sub">(New+Resurrected)/Churned；&lt;1 = 流失大于新增</p><figure><div id="c_qr"></div></figure></div>
- <div class="card"><h3>需要关注</h3><div id="alerts"></div></div>
+ <div class="card"><h3>Quick Ratio（RET-04 · 周）</h3><p class="sub">(New+Resurrected)/Churned；&lt;1 = 流失大于新增</p><figure><div id="c_qr"></div></figure></div>
+ <div class="card"><h3>需要关注（自动告警）</h3><div id="alerts"></div></div>
 </div>`,
 act:`
 <div class="grid g4">
@@ -422,7 +423,7 @@ act:`
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>注册 → 绑定前置漏斗（REG-05/06）</h3><p class="sub">以本期 App 注册账号为基准 100（账号 UV）</p><figure><div id="c_bindfun"></div><figcaption>差值池两种成分：买前先下 App 研究（销售线索）vs 收到货绑定失败/放弃（开箱问题）。</figcaption></figure></div>
- <div class="card"><h3>激活健康</h3><table class="dt">
+ <div class="card"><h3>激活健康（REG）</h3><table class="dt">
   <tr><th>指标</th><th>值</th><th>周环比</th></tr>
   <tr><td>首次绑定成功率（REG-06）</td><td>93.1%</td><td><span class="pill good">+0.4pp</span></td></tr>
   <tr><td>户均设备数（REG-07）</td><td>1.08</td><td>—</td></tr>
@@ -438,7 +439,7 @@ eng:`
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>用户分层占比（ACT-14 · 近 28 天）</h3><p class="sub">单位：账号占比 %（UV）</p>${L([{n:'Power ≥12 次',c:'--seq6'},{n:'Regular 4–11',c:'--seq4'},{n:'Light 1–3',c:'--seq2'},{n:'Dormant',c:'--seq1'},{n:'Churned',c:'--grid'}])}<figure><div id="c_seg"></div><figcaption>Power 层占比是产品成功的最硬指标，也是 Pro 的天然候选池。</figcaption></figure></div>
- <div class="card"><h3>活跃健康</h3><table class="dt">
+ <div class="card"><h3>活跃健康（ACT）</h3><table class="dt">
   <tr><th>指标</th><th>本周</th><th>上周</th></tr>
   <tr><td>运动转化率 A3/A1（ACT-10）</td><td id="m_b10"></td><td class="note">—</td></tr>
   <tr><td>联网健康率 A2/A1（ACT-11）</td><td id="m_b11"></td><td class="note">—</td></tr>
@@ -460,7 +461,7 @@ ret:`
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>Quick Ratio（RET-04 · 周）</h3><figure><div id="c_qr2"></div><figcaption>逼近 1 而总量在涨 = 增长全靠新销量填流失坑。</figcaption></figure></div>
- <div class="card"><h3>Growth Accounting（本周）</h3><table class="dt">
+ <div class="card"><h3>Growth Accounting（RET · 本周分量）</h3><table class="dt">
   <tr><th>分量</th><th>账号数</th></tr>
   <tr><td>New（新激活且活跃）</td><td>+330 账号</td></tr>
   <tr><td>Resurrected（复活，RET-05）</td><td>+85 账号</td></tr>
@@ -471,7 +472,7 @@ ret:`
 </div>`,
 wk:`
 <div class="grid g4">
- ${kpi('w1','本周有效训练次数','次（PV，不去重）· ≥1 完整组或 ≥1 分钟')}
+ ${kpi('w1','本周有效训练次数','TRN · 次（PV，不去重）· ≥1 完整组或 ≥1 分钟')}
  ${kpi('w2','深度训练占比 ★','TRN-09 · %（次 PV）· ≥2 组且≥5 分钟')}
  ${kpi('w3','Time to First Workout','TRN-06 · 天（中位数，账号 UV）')}
  ${kpi('w4','自填负荷覆盖率','TRN-16 · %（组记录 PV）')}
@@ -507,7 +508,7 @@ mem:`
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>AI 时长配额使用（SUB-17/18 · 二期参考）</h3><p class="sub">纵轴：账号占比 %（UV）</p>${L([{n:'Plus',c:'--plus'},{n:'Pro',c:'--propaid'}])}<figure><div id="c_quota"></div><figcaption>配额：AI 课 Plus 20h/月 · Pro 200h/不限；存储 5G / 100G。Plus 触顶池 = 升级名单；Pro 低用量 = 流失/降级高危。（用量指标为二期，此处示意）</figcaption></figure></div>
- <div class="card"><h3>会员健康</h3><table class="dt">
+ <div class="card"><h3>会员健康（SUB）</h3><table class="dt">
   <tr><th>指标</th><th>值</th><th></th></tr>
   <tr><td>首次续费率（SUB-08）</td><td>78%</td><td><span class="pill good">生死线之上</span></td></tr>
   <tr><td>平均在订时长（SUB-13）</td><td>5.8 个月</td><td class="note">无金额条件下的 LTV 代理</td></tr>
@@ -556,6 +557,21 @@ doc:`
  <tr><td><span class="mono">agg_user_daily</span></td><td>账号×日宽表：全部活跃/留存/训练指标的唯一底座</td></tr>
  <tr><td><span class="mono">agg_membership_daily</span></td><td>账号×日×tier：全部会员指标的唯一底座</td></tr></table></div>
 </div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>数据分层：埋点 → 派生（四层 lineage）</h3>
+ <table class="dt"><tr><th>层</th><th>性质</th><th>内容</th></tr>
+ <tr><td><b>L0 原始事件</b></td><td><b>需埋点/接口</b>，append-only</td><td>开机/心跳/session/组/绑定/会员事件…（埋点状态见字典 A-8.2）</td></tr>
+ <tr><td>L1 日快照</td><td>L0 按日展开判定</td><td>agg_user_daily（a1/a2/a3、有效训练判定）· agg_membership_daily（状态机展开）</td></tr>
+ <tr><td>L2 计数指标</td><td>count / sum / distinct</td><td>全部绝对值：REG-01…04、ACT 矩阵、TRN 次数组数、SUB 人数</td></tr>
+ <tr><td><b>L3 比率/复合</b></td><td><b>两个 L2 的商</b>，无独立数据源</td><td>全部率（-R/转化/留存/渗透/完成）、Quick Ratio、tenure、Mix</td></tr></table>
+ <p class="note" style="margin-top:8px">校验路径：数字可疑时从 L3 拆回 L2 分子分母，再拆回 L0 事件重放。<b>关键新增埋点</b>：set_completed（★第一优先级）、device_binding_event（绑定历史流）、membership_event 扩展（gift_redeem / entitlement_source / gift_months）。</p></div>
+ <div class="card"><h3>维度分类（三类，别混）</h3>
+ <table class="dt"><tr><th>类</th><th>清单</th><th>校验要点</th></tr>
+ <tr><td><b>交叉维度</b><br><span class="note">任何指标可切</span></td><td>时间（日/ISO 周/月）、product_line→国家、激活 cohort、渠道、SKU、固件、会员状态</td><td><b>可加性</b>：L2 指标切分后加总 = 总量；率类切分后须重算不可加总</td></tr>
+ <tr><td><b>内生维度</b><br><span class="note">只属某族指标</span></td><td>活跃层级 A1/A2/A3、课型、赠送月数、用户分层、计费周期、权益来源</td><td><b>MECE</b>：各档互斥完备，分档加总 = 全量</td></tr>
+ <tr><td><b>比例关系</b><br><span class="note">不是维度，是 L3 派生</span></td><td>活跃率 -R、各转化率、留存率、渗透率、完成率、Quick Ratio</td><td>分子口径域 ⊆ 分母；分子分母编号可查；<b>换分母必须换指标名</b></td></tr></table>
+ <p class="note" style="margin-top:8px"><b>模块关系</b>：ACT / TRN / RET 同属「参与」域——<b>ACT 定性</b>（有没有练，UV 二值）、<b>TRN 定量</b>（练了多少多深，多为 PV）、RET 是参与的时间维展开。阅读顺序：ACT 有没有 → RET 还在不在 → TRN 练得怎样。</p></div>
+</div>
 <div class="card" style="margin-top:14px"><h3>指标口径速查（悬浮任意页面上的编号 ⓘ 也可查看）</h3><div id="docTable"></div>
 <p class="note" style="margin-top:8px">完整定义（含 SQL 落地口径与二期指标）见仓库 docs/atom-data-dictionary.md v1.2。</p></div>`,
 dev:`
@@ -569,7 +585,7 @@ dev:`
  <div class="card"><h3>固件版本分布（DEV-02）</h3><p class="sub">设备占比 %（台，UV）</p><figure><div id="c_fw"></div><figcaption>与周 cohort 联动：新固件发布后观察对应 cohort 的 W1 留存是否异动。</figcaption></figure></div>
  <div class="card"><h3>开机事件补传延迟分布（DEV-05）</h3><p class="sub">事件占比 %（PV）· 7 天窗口内形态；&gt;7 天丢弃不入指标、留档监控</p><figure><div id="c_delay"></div></figure></div>
 </div>
-<div class="card" style="margin-top:14px"><h3>数据完整性</h3><table class="dt">
+<div class="card" style="margin-top:14px"><h3>数据完整性（DEV）</h3><table class="dt">
 <tr><th>监控项</th><th>状态</th><th>说明</th></tr>
 <tr><td>set_completed 上报率</td><td><span class="pill good">99.2%</span></td><td>有效训练判定的第一依赖</td></tr>
 <tr><td>上课时长统计</td><td><span class="pill good">后端可得</span></td><td>D21 已确认；有效运动时长（扣暂停）作为增强项跟进</td></tr>
