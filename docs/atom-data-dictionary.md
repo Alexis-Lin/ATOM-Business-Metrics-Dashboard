@@ -1,8 +1,8 @@
-# Atom 业务数据定义说明 v1.7
+# Atom 业务数据定义说明 v1.8
 
 > **本文档是 Atom 商业业绩指标体系的口径 SSOT**：产品业务定义 + 指标字典 + 后台数据字段定义。
 > 战略框架见 [`atom-metrics-framework.md`](atom-metrics-framework.md)；账号档案字段 SSOT = [`ATOM-UserGoalPreference-and-OnBoarding`](https://github.com/Alexis-Lin/ATOM-UserGoalPreference-and-OnBoarding) 仓（下称档案仓）；计费/订单事实 SSOT = 订单系统。
-> 版本：v1.7（2026-08-18）｜ 总览简化（D28）：四段绝对值主漏斗 + 留存单列 + 四张精选卡；漏斗段更名「有效训练人数」；TRN16 移出看板转数据质量监控。
+> 版本：v1.8（2026-08-18）｜ 用户分层重定（Power = 一周两练、重度 = 周 3+，D29）；留存观察点 W2/3/4/8、Aha 阈值改 ≥2 次（D30）；新增 App 三分类维度（D31）。
 
 ## 0. 体系设计原则（结构化审视后确立）
 
@@ -52,6 +52,20 @@
 | **课型** | `WORKOUT` 大课 20–30 min / `MINI` 短课 5–10 min / `MICRO` 微课 1–2 min。分开统计，不做课次加总 |
 | **深度训练** | 单次 ≥2 完整组 且 ≥5 分钟 |
 | **负荷 load** | 用户自填（无阻力传感器）。基于 load 的指标必须同报**自填负荷覆盖率** |
+
+**A-3b App 三分类（D31 · 内生维度 `app_category`）**
+
+设备上有多个 App（Workout、桌面跳绳、体态监测「抬头番茄」、One Set 计组等），且会持续增加。**按交互形态归入三类**，新 App 上线先归类再上报：
+
+| 类 | code | 定义 | 示例 | 计入哪层活跃 |
+|---|---|---|---|---|
+| **身体运动类** | `PHYSICAL` | 需要身体真实运动的训练 | Workout、桌面跳绳、One Set | **唯一计入 A3 运动活跃 / 有效训练**的类 |
+| **桌面参与类** | `DESK` | 被动坐在桌前参与 | 体态监测「抬头番茄」 | 计入 A1/A2；**不计 A3**——挂机一下午不能算"练了" |
+| **语音交互与把玩类** | `AMBIENT` | 纯语音交互、桌面查看/把玩 | 语音助手、表盘查看 | 计入 A1/A2；不计 A3 |
+
+- **口径红线**：有效训练判定（≥1 完整组或 ≥1 分钟）**仅对 PHYSICAL 类会话生效**——否则运动指标被桌面挂机污染。One Set 按组计数天然适配"完整组"判据；跳绳按跳绳段计组。
+- DESK 类另设**参与时长**口径（分钟 PV，判定阈值待 R19），与训练时长分开、不混算。
+- 分 App 活跃 = ENG16（各类 DAU/WAU 账号数，**类间可重叠**——一个账号一天可能又练又挂体态监测；不是 MECE 分层，是使用画像）。
 
 ### A-4. 会员体系（第四轮修订）
 
@@ -133,7 +147,7 @@ FREE ──首次绑定 ATOM──▶ PLUS（账号终身免费，解绑设备�
 | `onboarding_step` / `wifi_setup` | App/固件 | ⚠ 需确认现状 | DEV04（配网质量，绑定流程问题归此处） |
 | `device_power_on` | 固件（离线本地缓存，7 天补传） | ✅ 已有（D5/D8） | A1 → ENG 全系、RET |
 | `device_heartbeat` | 固件 | ✅ 已有 | A2、DEV01 |
-| `workout_session_start/end` | App/算法侧 | ✅ 已有（duration 后端有，D21） | A3、TRN01…08 |
+| `session_start/end`（全 App 统一，带 **app_id → app_category**） | App/算法侧 | ⚠ 需扩展——现有仅 Workout 会话；跳绳/One Set/抬头番茄等需统一 session 事件模型并携带 app_id | A3（仅 PHYSICAL）、ENG16/17、TRN01…08 |
 | **`set_completed`** | 算法侧 | ★ **第一优先级新增** | 有效训练判定（D6）、TRN09…12/16/17 |
 | `form_score` | 算法侧 | ✅ 已有（档案仓 log.bodypark） | TRN18 |
 | `membership_event`（需含 gift_redeem、entitlement_source、gift_months） | 订单系统 | ⚠ **需扩展**——现有 membership_tier 三档枚举区分不了赠送/自费/兑换 | SUB 全系 |
@@ -146,7 +160,7 @@ FREE ──首次绑定 ATOM──▶ PLUS（账号终身免费，解绑设备�
 | 类 | 定义 | 清单 | 校验要点 |
 |---|---|---|---|
 | **交叉维度**（任何指标都可切） | 独立于指标存在的切片轴 | 时间（日 / ISO 周 / 月，PT 日界）、product_line（CN/INTL → 国家）、激活 cohort（周/月）、渠道、SKU、固件版本、会员状态 | **可加性**：任一 L2 指标按交叉维度切分后加总 = 总量；率类切分后不可直接加总（需重算） |
-| **内生维度**（只属于某族指标） | 指标定义内部的分解轴 | 活跃层级 A1/A2/A3、课型 WORKOUT/MINI/MICRO、赠送月数 1–12、用户分层 Power…Churned、计费周期、权益来源 gift/paid | **MECE**：各档互斥且完备，分档加总 = 全量（如 Plus+ProGift+ProPaid+Free = 全部账号） |
+| **内生维度**（只属于某族指标） | 指标定义内部的分解轴 | 活跃层级 A1/A2/A3、**App 分类 PHYSICAL/DESK/AMBIENT**（ENG16 类间可重叠，非 MECE）、课型 WORKOUT/MINI/MICRO、赠送月数 1–12、用户分层 Heavy…Churned、计费周期、权益来源 gift/paid | **MECE**：各档互斥且完备，分档加总 = 全量（如 Plus+ProGift+ProPaid+Free = 全部账号） |
 | **比例关系**（不是维度，是 L3 派生） | 两个已编号指标的商 | 活跃率（R 后缀）、ACT05、ENG10/11、RET 留存率、SUB03…06/08/10、TRN03 | 分子的口径域 ⊆ 分母；分子分母编号在字典可查；**换分母必须换指标名**（防止同名不同率） |
 
 ---
@@ -181,19 +195,21 @@ FREE ──首次绑定 ATOM──▶ PLUS（账号终身免费，解绑设备�
 | ENG11 | 联网健康率 | WAU-A2 / WAU-A1 | P1 |
 | ENG12 | 周频次分布 | 周有效训练次数直方图 0/1/2/3/4/5+ | P1 |
 | ENG13 | 周均有效训练次数 | Σ有效训练 / WAU-A3 | P1 |
-| ENG14 | 用户分层 | 近 28 天：Power ≥12 / Regular 4–11 / Light 1–3 / Dormant / Churned | P1 |
+| ENG14 | 用户分层（D29 重定） | 近 28 天有效训练次数，MECE 六档：**重度 Heavy ≥12（周 3+）/ Power 8–11（一周两练）/ Regular 4–7 / Light 1–3 / Dormant 0 次有开机 / Churned 无活跃**；对外"Power User 率" = ≥8 次占比（Power+Heavy） | P1 |
+| ENG16 | 分 App 类活跃 | {DAU/WAU} × app_category（PHYSICAL/DESK/AMBIENT），账号 UV，类间可重叠 | P1 |
+| ENG17 | 桌面参与时长 | DESK 类会话时长（分钟 PV；人均 = ÷ DESK 周活跃账号），判定阈值待 R19 | P1 |
 | ENG15 | 静默账号 | 近 28 天 A1=0 | P1 |
 
 ### RET 留存
 
 | # | 指标 | 口径 | 期 |
 |---|---|---|---|
-| RET01 ★ | 周 cohort Wn 留存 | 激活 ISO 周分组 × A1/A2/A3；样本<100 灰显 | P1 |
+| RET01 ★ | 周 cohort Wn 留存 | 激活 ISO 周分组 × A1/A2/A3；**关键观察点 = W2 / W3 / W4 / W8**（D30）；样本<100 灰显 | P1 |
 | RET02 | 月 cohort Mn 留存 | 2026-04 起 | P1 |
 | RET03 | D1/D7/D30 | 精确日留存 | P1 |
 | RET04 ★ | Quick Ratio | (New+Resurrected)/Churned，周/月 | P1 |
 | RET05 | 复活率 / 复活后留存 | 沉默≥28 天回归比例；回归后 4 周 | P1 |
-| RET06 | 首周 ≥3 次占比 | Aha 前导（阈值待数据校准） | P1 |
+| RET06 | 首周 ≥2 次占比 | Aha 前导；阈值由 ≥3 调整为 **≥2**（D30，与 Power=一周两练对齐）；仅计 PHYSICAL 类有效训练 | P1 |
 
 维度：product_line、国家、渠道、激活时固件 × 当前固件、首课类型、目标大类（goals[].code）、声明周频、会员状态。
 
@@ -228,7 +244,7 @@ FREE ──首次绑定 ATOM──▶ PLUS（账号终身免费，解绑设备�
 | SUB13 ★ | **会员在订时长 tenure** | PAID 账号的累计在订月数分布 + 均值——无金额条件下的 LTV 代理 | P1 |
 | SUB14 | 赠送期活跃质量 | GIFT 期内 WAU-A3（SUB06 的前导） | P1 |
 | SUB15 | 低活跃付费池 | PAID 且 28 天 0 训练（干预名单） | P1 |
-| SUB16 | 高频 Plus 池 | 周 ≥2 次训练未付费（转化名单） | P1 |
+| SUB16 | 高频 Plus 池 | 周 ≥2 次训练（= Power 口径）未付费——转化名单 | P1 |
 | SUB90…93 | 权益用量：AI 时长/触顶、存储、高阶功能 | 配额：AI 20h vs 200h/不限；存储 5G vs 100G | **P2**（暂不重要，D20） |
 | SUB94 | 收入金额（MRR 等） | 多地区价格/汇率口径统一后接入 | **P2** |
 
@@ -263,6 +279,7 @@ FREE ──首次绑定 ATOM──▶ PLUS（账号终身免费，解绑设备�
 agg_user_daily        字段名更新：a1/a2/a3 flag（原 l1/l2/l3）
 agg_membership_daily  增加：redeemed_at?（兑换时间）、tenure_months（在订月数，滚动累计）
 dim_sku_gift_map      SKU → gift_months；由后台套餐定义表同步（价格字段暂不消费）
+dim_app               app_id → app_category(PHYSICAL/DESK/AMBIENT)、app_name —— 新 App 上线先归类（D31）
 （移除一期范围：fct_sales_manual）
 ```
 
@@ -273,6 +290,14 @@ dim_sku_gift_map      SKU → gift_months；由后台套餐定义表同步（价
 ---
 
 ## 附录 · 决议记录
+
+**第八轮（2026-08-18）**
+
+| # | 议题 | 决议 |
+|---|---|---|
+| D29 | 用户分层重定 | ✅ 边界由月 12 次调整为 **8 次**：近 28 天 MECE 六档 = 重度 Heavy ≥12（周 3+）/ **Power 8–11（一周两练）**/ Regular 4–7 / Light 1–3 / Dormant / Churned；对外"Power User 率" = ≥8 次占比 |
+| D30 | 留存口径 | ✅ 周 cohort 关键观察点 = **W2 / W3 / W4 / W8**；Aha 前导阈值 首周 ≥3 次 → **首周 ≥2 次**（与 Power 口径对齐） |
+| D31 | App 三分类 | ✅ `app_category`：**身体运动 PHYSICAL**（唯一计入 A3/有效训练）/ **桌面参与 DESK**（计 A1/A2 不计 A3，另设参与时长）/ **语音交互与把玩 AMBIENT**。新增 ENG16 分 App 活跃、ENG17 桌面参与时长；session 事件统一模型并带 app_id |
 
 **第七轮（2026-08-18）**
 
@@ -307,6 +332,6 @@ dim_sku_gift_map      SKU → gift_months；由后台套餐定义表同步（价
 
 **第三轮**（D10–D17）与更早决议见 git 历史版本；全部已并入正文。
 
-**仍待拍板**：R16 赠送兑换的有效期（购买后多久内必须兑换？决定 SUB05 分母窗口）；R17 Pro 自费的计费周期与各区价格表（SUB08 细分、SUB94 前置）。
+**仍待拍板**：R16 赠送兑换有效期窗口；R17 Pro 计费周期与各区价格表；**R18** App→分类映射表首版（现有全部 App 逐一归类）；**R19** DESK 类"有效参与"判定阈值（抬头番茄连续挂机如何计时长/去水分）。
 
-*v1.7（2026-08-18）｜ v1.6 → v1.7：D28 总览简化。｜  v1.5 → v1.6：D27 展示排序与文案（ACT01–04 重排、三卡更名）。｜  v1.4 → v1.5：命名体系 v2（D25）、移除首次绑定成功率（D26）。｜  v1.3 → v1.4：新增 A-8 数据分层与维度分类；明确 ACT 定性 / TRN 定量同属参与域。｜  v1.2 → v1.3：活跃指标增加 -R 活跃率配套读法。｜ v1.1 → v1.2：新增 A-7 PV/UV 计数口径与单位规范。｜  v1.0 → v1.1：并入第四轮决议；指标编号改模块助记码并标注 P1/P2；新增 SUB05 兑换率与 SUB13 会员时长；活跃层 A1/A2/A3；销售依赖指标全部移入 P2。*
+*v1.8（2026-08-18）｜ v1.7 → v1.8：D29 分层重定、D30 留存观察点与 Aha 阈值、D31 App 三分类。｜  v1.6 → v1.7：D28 总览简化。｜  v1.5 → v1.6：D27 展示排序与文案（ACT01–04 重排、三卡更名）。｜  v1.4 → v1.5：命名体系 v2（D25）、移除首次绑定成功率（D26）。｜  v1.3 → v1.4：新增 A-8 数据分层与维度分类；明确 ACT 定性 / TRN 定量同属参与域。｜  v1.2 → v1.3：活跃指标增加 -R 活跃率配套读法。｜ v1.1 → v1.2：新增 A-7 PV/UV 计数口径与单位规范。｜  v1.0 → v1.1：并入第四轮决议；指标编号改模块助记码并标注 P1/P2；新增 SUB05 兑换率与 SUB13 会员时长；活跃层 A1/A2/A3；销售依赖指标全部移入 P2。*

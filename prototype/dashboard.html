@@ -215,9 +215,9 @@ const FREQ={labels:['0','1','2','3','4','5+'],vals:[38,22,16,11,7,6]};
 const GIFT={labels:['赠 1 个月','赠 3 个月','赠 6 个月','赠 12 个月'],conv:[12,22,31,38],n:[178,252,126,48]};
 const AIH={labels:['0–20%','20–40%','40–60%','60–80%','80–99%','触顶'],plus:[41,23,14,9,7,6],pro:[18,20,22,18,13,9]};
 const SEG={labels:WK.slice(8).map(w=>w.label),
-  power:[9,9,10,10,10,11,11,11,12,12,12,12],regular:[24,24,25,25,26,26,26,27,27,27,26,26],
-  light:[27,27,27,26,26,26,25,25,25,24,24,24],dormant:[22,22,21,21,21,20,21,21,20,21,21,22],
-  churn:[18,18,17,18,17,17,17,16,16,16,17,16]};
+  heavy:[4,4,5,5,5,5,5,6,6,6,6,6],power:[7,7,7,8,8,8,8,8,9,9,9,9],
+  regular:[21,21,21,21,21,21,22,22,22,21,21,21],light:[27,27,26,26,26,25,25,24,24,24,24,24],
+  dormant:[22,22,22,21,21,21,20,21,20,21,21,21],churn:[19,19,19,19,19,20,20,19,19,20,19,19]};
 const FW={labels:['v2.4.0','v2.4.1','v2.5.0','v2.5.1(新)'],vals:[6,14,31,49]};
 const DELAY={labels:['<1 分','1–60 分','1–24 时','1–3 天','3–7 天','>7 天(丢弃)'],vals:[61,17,12,6,3,1]};
 
@@ -351,13 +351,14 @@ const INFO={
 'ENG08':{n:'WAU-Workout（NSM-1）',u:'账号/周 · UV',d:'自然滚动 7 日内完成 ≥1 次有效训练的账号数；配套活跃率（ENG08R）= ÷ 已绑定激活账号。基数增长期绝对值永远向上，活跃率才暴露参与度变化——两个都要看。',c:'计人不计次——一人练 10 次也是 1；"周训练总次数"是另一个指标（PV）。'},
 'ENG10':{n:'运动转化率',u:'% · 账号 UV',d:'WAU-A3 ÷ WAU-A1：开机的人里有多少真的练了。',c:'用周窗口算，不是 DAU 比值；低 = 用户被劝退（找课难/内容不合适）。'},
 'ENG13':{n:'周均有效训练次数',u:'次/账号/周 · PV÷UV',d:'总有效训练次数 ÷ 周运动活跃账号数。',c:'均值会被重度用户拉高——判断请看频次分布直方图。'},
-'ENG14':{n:'用户分层',u:'账号 · UV',d:'按近 28 天有效训练次数：Power ≥12 / Regular 4–11 / Light 1–3 / Dormant 0 次但有开机 / Churned 无任何活跃。',c:'Dormant ≠ Churned：前者还在开机（可内容召回），后者彻底沉默。'},
+'ENG14':{n:'用户分层（D29）',u:'账号 · UV · MECE 六档',d:'近 28 天有效训练次数：重度 Heavy ≥12（周3+）/ Power 8–11（一周两练）/ Regular 4–7 / Light 1–3 / Dormant 0 次有开机 / Churned 无活跃。对外「Power User 率」= ≥8 次占比（Power+重度）。',c:'Dormant ≠ Churned：前者还在开机（可召回），后者彻底沉默；仅计身体运动类有效训练。'},
+'ENG16':{n:'分 App 类活跃',u:'账号 · UV · 类间可重叠',d:'{DAU/WAU} × app_category：身体运动 PHYSICAL / 桌面参与 DESK / 语音把玩 AMBIENT。',c:'非 MECE——同一账号可同日用多类 App，各类分别去重；只有 PHYSICAL 计入 A3 与有效训练。'},
 'ENG15':{n:'静默账号',u:'账号 · UV',d:'近 28 天无任何 A1 开机的已激活账号。',c:'设备还在用户家里——是可召回资产，不是流失定论。'},
 'RET01':{n:'周 Cohort 留存率',u:'% · 账号 UV',d:'按首次绑定激活的 ISO 周分组，第 n 周内有过活跃的账号占比（区间留存）。',c:'≠ 第 n 天当天留存（那是 D1/D7/D30 精确日留存）；样本 <100 账号的格子灰显不作判断。'},
 'RET02':{n:'月 Cohort 留存率',u:'% · 账号 UV',d:'按激活月分组的区间留存，2026-04 起。',c:''},
 'RET04':{n:'Quick Ratio',u:'比值 · 账号 UV',d:'(新增活跃 + 复活) ÷ 流失，周/月两粒度。',c:'总量在涨它也可能逼近 1——那说明增长全靠新销量填流失的坑。<1 = 净流失。'},
 'RET05':{n:'复活率',u:'% · 账号 UV',d:'沉默 ≥28 天的账号中本期回归的比例。',c:'配合看复活后 4 周留存——复活即再沉默说明召回只是打扰。'},
-'RET06':{n:'首周 ≥3 次占比',u:'% · 账号 UV',d:'激活后 7 天内完成 ≥3 次有效训练的账号占比（Aha 前导指标）。',c:'阈值 3 次待真实数据相关性分析后校准。'},
+'RET06':{n:'首周 ≥2 次占比',u:'% · 账号 UV',d:'激活后 7 天内完成 ≥2 次有效训练（仅身体运动类）的账号占比——Aha 前导指标，阈值与 Power=一周两练对齐（D30）。',c:'阈值原为 3 次，2026-08-18 调整为 2 次——趋势图上打口径变更标注。'},
 'TRN03':{n:'完成率',u:'% · 课次 PV',d:'完成次数 ÷ 开始次数，按课型和单课分别看。',c:'分母是"次"不是"人"；点开 10 秒就退也计入开始。'},
 'TRN06':{n:'Time to First Workout',u:'天 · 账号 UV',d:'首次绑定 → 首次有效训练的时长，报中位数。',c:'长尾看 P90；>7 天未开练的账号是 onboarding 干预对象。'},
 'TRN08':{n:'课型 Mix',u:'课次占比 · PV',d:'大课/短课/微课的课次结构占比。',c:'三类课不等价，禁止简单加总课次做 KPI；合并视角用时长/组数加权。'},
@@ -374,7 +375,7 @@ const INFO={
 'SUB08':{n:'续费率',u:'% · 付费账号 UV',d:'自费 Pro 到期时完成续费的比例。',c:'首次续费与二次续费必须分开——首续是生死线。'},
 'SUB10':{n:'cancel_pending 占比',u:'% · 付费账号 UV',d:'已关闭自动续费但权益仍在期的账号占比。',c:'仍计入活跃付费 Pro（权益有效）——它是流失的先行指标，比到期流失早一个账期报警。'},
 'SUB13':{n:'会员在订时长 tenure',u:'月 · 账号 UV',d:'自费 Pro 账号的累计在订月数（分布 + 均值）。',c:'金额未接入前的 LTV 代理：付费人数 × 在订时长 × Pro 占比。'},
-'SUB16':{n:'高频 Plus 池',u:'账号 · UV',d:'周均 ≥2 次训练但未付费的 Plus 账号。',c:'最优质的 Pro 转化名单——练起来的人才会买。'},
+'SUB16':{n:'高频 Plus 池',u:'账号 · UV',d:'周均 ≥2 次训练（= Power 口径）但未付费的 Plus 账号。',c:'最优质的 Pro 转化名单——练起来的人才会买。'},
 'DEV01':{n:'设备在线率',u:'% · 台 UV',d:'当日联网设备 ÷ 近 28 天有开机的设备。',c:'分母不是累计激活台数——吃灰设备不该拉低在线率。'},
 'DEV05':{n:'补传延迟分布',u:'事件 · PV',d:'开机事件从发生到上传的延迟分布（7 天窗口内）。',c:'>7 天迟到的事件不入指标、留档监控（DEV06）——量级升高 = 固件补传策略异常。'},
 };
@@ -435,8 +436,11 @@ eng:`
  <div class="card"><h3>周训练频次分布（ENG12）</h3><p class="sub">横轴 = 周有效训练次数 · 纵轴 = 账号占比 %（UV）· 本周</p><figure><div id="c_freq"></div><figcaption>均值 2.1 次/周——但分布显示 38% 的周活跃账号本周 0 训练。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>用户分层占比（ENG14 · 近 28 天）</h3><p class="sub">单位：账号占比 %（UV）</p>${L([{n:'Power ≥12 次',c:'--seq6'},{n:'Regular 4–11',c:'--seq4'},{n:'Light 1–3',c:'--seq2'},{n:'Dormant',c:'--seq1'},{n:'Churned',c:'--grid'}])}<figure><div id="c_seg"></div><figcaption>Power 层占比是产品成功的最硬指标，也是 Pro 的天然候选池。</figcaption></figure></div>
- <div class="card"><h3>活跃健康（ACT）</h3><table class="dt">
+ <div class="card"><h3>用户分层占比（ENG14 · 近 28 天有效训练次数）</h3><p class="sub">单位：账号占比 %（UV）· MECE 六档</p>${L([{n:'重度 ≥12（周3+）',c:'--seq7'},{n:'Power 8–11（一周两练）',c:'--seq5'},{n:'Regular 4–7',c:'--seq3'},{n:'Light 1–3',c:'--seq2'},{n:'Dormant',c:'--seq1'},{n:'Churned',c:'--grid'}])}<figure><div id="c_seg"></div><figcaption>对外口径「Power User 率」= ≥8 次占比（Power + 重度）。Power 层是 Pro 的天然候选池。</figcaption></figure></div>
+ <div class="card"><h3>分 App 类周活跃（ENG16 · WAU）</h3><p class="sub">账号（UV）· 类间可重叠（同一账号可同时用多类 App）</p><figure><div id="c_appcat"></div><figcaption>只有身体运动类（Workout/跳绳/One Set）计入 A3 与有效训练；桌面参与类（抬头番茄）另计参与时长（ENG17，阈值待 R19）。</figcaption></figure></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>活跃健康（ENG）</h3><table class="dt">
   <tr><th>指标</th><th>本周</th><th>上周</th></tr>
   <tr><td>运动转化率 A3/A1（ENG10）</td><td id="m_b10"></td><td class="note">—</td></tr>
   <tr><td>联网健康率 A2/A1（ENG11）</td><td id="m_b11"></td><td class="note">—</td></tr>
@@ -447,14 +451,14 @@ eng:`
 </div>`,
 ret:`
 <div class="grid g2">
- <div class="card"><h3>周 Cohort · A3 运动留存（RET01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = 留存率 %（账号 UV）。样本 &lt;100 账号灰显。</p><figure><div id="c_coh"></div><figcaption>周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
+ <div class="card"><h3>周 Cohort · A3 运动留存（RET01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = 留存率 %（账号 UV）。样本 &lt;100 账号灰显。</p><figure><div id="c_coh"></div><figcaption><b>关键观察点：W2 / W3 / W4 / W8</b>（D30）。周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
  <div class="card"><h3>月 Cohort · A3 运动留存（RET02）</h3><p class="sub">2026-04 起 · 数字 = 留存率 %（账号 UV）</p><figure><div id="c_cohm"></div></figure>
- <h3 style="margin-top:16px">Aha 前导（RET06）</h3><table class="dt">
+ <h3 style="margin-top:16px">Aha 前导（RET06 · 阈值 = 首周 ≥2 次，与 Power 口径对齐）</h3><table class="dt">
   <tr><th>首周训练次数</th><th>占比</th><th>W12 留存</th></tr>
   <tr><td>0 次</td><td>31%</td><td>9%</td></tr>
-  <tr><td>1–2 次</td><td>41%</td><td>21%</td></tr>
-  <tr><td>≥3 次</td><td>28%</td><td><b>54%</b></td></tr>
- </table><p class="note" style="margin-top:6px">首周 ≥3 次的账号 W12 留存是 1–2 次组的 2.6 倍 → 下一季目标：把 28% 提上去。</p></div>
+  <tr><td>1 次</td><td>26%</td><td>15%</td></tr>
+  <tr><td><b>≥2 次</b></td><td><b>43%</b></td><td><b>48%</b></td></tr>
+ </table><p class="note" style="margin-top:6px">首周 ≥2 次的账号 W12 留存是仅 1 次组的 3.2 倍 → 目标：把 43% 提上去。仅计身体运动类（PHYSICAL）有效训练。</p></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>Quick Ratio（RET04 · 周）</h3><figure><div id="c_qr2"></div><figcaption>逼近 1 而总量在涨 = 增长全靠新销量填流失坑。</figcaption></figure></div>
@@ -619,7 +623,7 @@ function fillCharts(Mfull){
       ['付费渗透率','SUB04 · %（账号 UV）',(last(M.proPaid)/last(M.accts)*100).toFixed(1)+'%',0.3],
       ['赠转付转化率','SUB06 · %（到期账号 UV）· 滚动 30 天','26%',1.2]]);
     rows('cl4',[['W4 运动留存','RET01 · %（账号 UV）· 最新周 cohort','58%',0.8],
-      ['首周 ≥3 次占比','RET06 · %（Aha 前导）','28%',0.5],
+      ['首周 ≥2 次占比','RET06 · %（Aha 前导）','43%',0.6],
       ['Quick Ratio','RET04 · 比值（账号 UV）',last(QRs).toFixed(2),null]]);
     document.getElementById('fn_qr').textContent=last(QRs).toFixed(2);
     const rateify=a=>a.map((v,i)=>+(v/M.accts[i]*100).toFixed(1));
@@ -670,9 +674,11 @@ function fillCharts(Mfull){
     const s0=Math.max(0,Math.max(R0,8)-8), s1=Math.max(s0,Math.min(R1,19)-8);
     const segCut=a=>a.slice(s0,s1+1);
     stackChart(document.getElementById('c_seg'),{labels:SEG.labels.slice(s0,s1+1),asPct:true,series:[
-      {name:'Power',color:'--seq6',data:segCut(SEG.power)},{name:'Regular',color:'--seq4',data:segCut(SEG.regular)},
-      {name:'Light',color:'--seq2',data:segCut(SEG.light)},{name:'Dormant',color:'--seq1',data:segCut(SEG.dormant)},
-      {name:'Churned',color:'--grid',data:segCut(SEG.churn)}]});
+      {name:'重度 ≥12',color:'--seq7',data:segCut(SEG.heavy)},{name:'Power 8–11',color:'--seq5',data:segCut(SEG.power)},
+      {name:'Regular 4–7',color:'--seq3',data:segCut(SEG.regular)},{name:'Light 1–3',color:'--seq2',data:segCut(SEG.light)},
+      {name:'Dormant',color:'--seq1',data:segCut(SEG.dormant)},{name:'Churned',color:'--grid',data:segCut(SEG.churn)}]});
+    barH(document.getElementById('c_appcat'),{labels:['身体运动类','桌面参与类','语音交互与把玩'],
+      vals:[962,468,197],suffix:'',color:'--seq4',max:1100,note:['PHYSICAL · 计入 A3','DESK · 不计 A3','AMBIENT']});
     document.getElementById('m_b10').textContent=Math.round(last(M.wau3)/last(M.wau1)*100)+'%';
     document.getElementById('m_b11').textContent=Math.round(last(M.wau2)/last(M.wau1)*100)+'%';
   }
