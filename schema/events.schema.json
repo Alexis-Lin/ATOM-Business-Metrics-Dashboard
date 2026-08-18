@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atom.bodypark.ai/schema/events.schema.json",
+  "title": "Atom L0 埋点事件 Schema（v1.0 · 对应数据字典 v2.0 Part C）",
+  "description": "所有 L0 原始事件的公共信封 + 各事件 payload 定义。日界一律以 PT（America/Los_Angeles）在数仓侧换算，端上只上报 UTC 时间戳与设备本地时间。离线事件（开机等）允许最多 7 天回补：超过 7 天的迟到事件不进指标，归档至 late_events 并计入 DEV06 监控。",
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "description": "公共信封：所有事件必带。",
+      "required": ["event_id", "event_type", "device_local_ts", "server_received_ts", "account_edition"],
+      "properties": {
+        "event_id": { "type": "string", "description": "端上生成的幂等 ID（ULID/UUID），服务端按此去重" },
+        "event_type": { "type": "string", "description": "事件类型名，见各事件定义" },
+        "user_id": { "type": ["string", "null"], "description": "账号 ID（ULID，同账号体系 SSOT）。设备侧未登录事件可为 null，入仓后经 bridge_user_device 回填" },
+        "device_id": { "type": ["string", "null"], "description": "设备序列号/唯一 ID。纯 App 侧事件（如 app_registration 前）可为 null" },
+        "app_id": { "type": ["string", "null"], "description": "应用 ID，关联 dim_app（含 app_category：PHYSICAL/DESK/AMBIENT）。非应用事件为 null" },
+        "device_local_ts": { "type": "string", "format": "date-time", "description": "事件发生时的设备本地时间（含时区偏移）。离线回补场景以此为准计算归属日（PT 换算）" },
+        "server_received_ts": { "type": "string", "format": "date-time", "description": "服务端接收时间（UTC）。与 device_local_ts 差值 >7 天 → 丢弃出指标、归档、计 DEV06" },
+        "account_edition": { "type": "string", "enum": ["CN", "INTL"], "description": "分区键：国内版/国际版两套系统完全隔离，仅 L2 指标层可汇总" },
+        "session_id": { "type": ["string", "null"], "description": "会话 ID：session_start/session_end/set_completed 必带，其余可空" },
+        "app_version": { "type": ["string", "null"], "description": "上报时的固件/应用版本，供 DEV02 版本分布" }
+      }
+    },
+    "workout_length_type": {
+      "type": "string",
+      "enum": ["mini", "short", "long"],
+      "description": "课程时长类型（内容侧为每节课标注的意图维度，与实际时长/完成度正交）。mini=短练（<5 分钟）；short=小课（5～15 分钟，含两端）；long=长课（>15 分钟）。注：不叫 workout_type——该字段名已被『课程类型』占用"
+    }
+  },
+  "oneOf": [
+    {
+      "title": "device_power_on（开机）",
+      "description": "A1 层。设备每次开机上报；离线时本地缓存，联网后回补（≤7 天）。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "device_power_on" },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "boot_reason": { "type": "string", "enum": ["user", "ota_reboot", "crash_recovery", "power_restore"], "description": "开机原因，供稳定性分析（非指标口径）" },
+            "was_offline_backfill": { "type": "boolean", "description": "true=离线缓存后回补上报" }
+          }
+        }
+      },
+      "required": ["device_id"]
+    },
+    {
+      "title": "device_heartbeat（联网心跳）",
+      "description": "A2 层判定依据 + DEV07 实时在线数。联网状态下周期上报（建议 5 分钟）。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "device_heartbeat" },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "network_type": { "type": "string", "enum": ["wifi", "ethernet", "other"] },
+            "rssi": { "type": ["integer", "null"], "description": "Wi-Fi 信号强度 dBm，可选" }
+          }
+        }
+      },
+      "required": ["device_id"]
+    },
+    {
+      "title": "wifi_setup（配网结果）",
+      "description": "ACT 漏斗辅助：配网成功/失败及失败原因。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "wifi_setup" },
+        "payload": {
+          "type": "object",
+          "required": ["result"],
+          "properties": {
+            "result": { "type": "string", "enum": ["success", "fail"] },
+            "fail_reason": { "type": ["string", "null"], "enum": ["wrong_password", "timeout", "router_incompatible", "user_abort", "other", null] },
+            "duration_sec": { "type": ["number", "null"], "description": "配网耗时（秒）" }
+          }
+        }
+      },
+      "required": ["device_id"]
+    },
+    {
+      "title": "app_registration（账号注册）",
+      "description": "ACT01/ACT02 依据。账号创建成功时服务端落一条（以服务端为准，端上事件仅校验）。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "app_registration" },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "register_channel": { "type": "string", "description": "注册渠道（app/web/oauth_provider）" },
+            "country_code": { "type": ["string", "null"], "description": "ISO 3166-1 alpha-2，供地区筛选" }
+          }
+        }
+      },
+      "required": ["user_id"]
+    },
+    {
+      "title": "device_binding_event（设备绑定/解绑）",
+      "description": "ACT03 设备激活 = 首次 bind 成功。维护 bridge_user_device（一账号多设备）。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "device_binding_event" },
+        "payload": {
+          "type": "object",
+          "required": ["action", "result"],
+          "properties": {
+            "action": { "type": "string", "enum": ["bind", "unbind", "rebind"] },
+            "result": { "type": "string", "enum": ["success", "fail"] },
+            "is_first_bind_of_device": { "type": ["boolean", "null"], "description": "true=该设备生命周期内首次绑定成功 → 计入 ACT03 设备激活" }
+          }
+        }
+      },
+      "required": ["user_id", "device_id"]
+    },
+    {
+      "title": "session_start（应用会话开始）",
+      "description": "A3 层判定依据：任一 app_id 的会话即『应用活跃』。统一事件，靠 app_id 区分应用（Workout/跳绳/One Set/抬头番茄等）。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "session_start" },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "content_id": { "type": ["string", "null"], "description": "课程/内容 ID（PHYSICAL 类通常有；关联 dim_content 取 workout_length_type）" },
+            "workout_length_type": { "$ref": "#/$defs/workout_length_type", "description": "冗余下发（以 dim_content 为准，端上快照仅兜底）" },
+            "entry_point": { "type": ["string", "null"], "description": "进入路径（home/recommend/schedule/voice）" }
+          }
+        }
+      },
+      "required": ["app_id", "session_id"]
+    },
+    {
+      "title": "session_end（应用会话结束）",
+      "description": "会话时长、完成度归档。PHYSICAL 类由此判定有效训练（≥1 完整组 或 ≥60 秒）→ A4。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "session_end" },
+        "payload": {
+          "type": "object",
+          "required": ["duration_sec"],
+          "properties": {
+            "duration_sec": { "type": "number", "minimum": 0, "description": "会话实际时长（秒）" },
+            "content_id": { "type": ["string", "null"] },
+            "workout_length_type": { "$ref": "#/$defs/workout_length_type" },
+            "completion_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 100, "description": "课程完成度百分比（按课程结构进度，非纯时长比）。完课阈值当前占位 70%（R20 待定）" },
+            "sets_completed": { "type": ["integer", "null"], "minimum": 0, "description": "本会话完整组数（与 set_completed 事件对账）" },
+            "end_reason": { "type": ["string", "null"], "enum": ["finished", "user_quit", "timeout", "crash", null] }
+          }
+        }
+      },
+      "required": ["app_id", "session_id"]
+    },
+    {
+      "title": "set_completed（完整组完成）⭐ 最高优先级新增埋点",
+      "description": "有效训练判定的核心事件：组有完整定义，做完即算（个数不限）。仅 PHYSICAL 类应用上报。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "set_completed" },
+        "payload": {
+          "type": "object",
+          "required": ["set_index"],
+          "properties": {
+            "set_index": { "type": "integer", "minimum": 1, "description": "会话内第几组" },
+            "content_id": { "type": ["string", "null"] },
+            "movement_code": { "type": ["string", "null"], "description": "动作编码" },
+            "rep_count": { "type": ["integer", "null"], "description": "次数（信息用途；有效性判定与次数无关）" },
+            "user_reported_load_kg": { "type": ["number", "null"], "description": "用户自填负重（无阻力传感器）" }
+          }
+        }
+      },
+      "required": ["app_id", "session_id", "user_id"]
+    },
+    {
+      "title": "membership_event（会员状态变更）",
+      "description": "SUB 模块（开发后置 D35）。状态机 FREE→PLUS→PRO_GIFT→PRO_PAID；礼包为兑换制。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "membership_event" },
+        "payload": {
+          "type": "object",
+          "required": ["action", "tier"],
+          "properties": {
+            "action": { "type": "string", "enum": ["grant", "gift_redeem", "purchase", "renew", "expire", "cancel"] },
+            "tier": { "type": "string", "enum": ["FREE", "PLUS", "PRO_GIFT", "PRO_PAID"] },
+            "entitlement_source": { "type": ["string", "null"], "enum": ["device_bundle", "gift_code", "paid_order", "ops_grant", null] },
+            "gift_months": { "type": ["integer", "null"], "minimum": 1, "maximum": 12, "description": "礼包月数（1–12，按 SKU 配置 dim_sku_gift_map）" },
+            "order_id": { "type": ["string", "null"] }
+          }
+        }
+      },
+      "required": ["user_id"]
+    },
+    {
+      "title": "ota_event（固件升级）",
+      "description": "DEV02 版本分布辅助（OTA 周更）。",
+      "allOf": [{ "$ref": "#/$defs/envelope" }],
+      "properties": {
+        "event_type": { "const": "ota_event" },
+        "payload": {
+          "type": "object",
+          "required": ["from_version", "to_version", "result"],
+          "properties": {
+            "from_version": { "type": "string" },
+            "to_version": { "type": "string" },
+            "result": { "type": "string", "enum": ["success", "fail", "rollback"] }
+          }
+        }
+      },
+      "required": ["device_id"]
+    }
+  ]
+}

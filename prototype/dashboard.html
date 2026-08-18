@@ -180,7 +180,7 @@ for(const k of ['intl','cn']){
   d.newAct.forEach(v=>{c+=v; d.cum.push(c);});
   d.wau1=d.cum.map((c,i)=>Math.round(c*(0.60-0.006*i)*(1+(r()-.5)*.06)));   // power-on WAU share slowly declining
   d.wau2=d.wau1.map(v=>Math.round(v*(0.90+(r()-.5)*.03)));
-  d.wauApp=d.wau2.map(v=>Math.round(v*(0.82+(r()-.5)*.04)));   // A3 应用使用（任一 App 会话）
+  d.wauApp=d.wau2.map(v=>Math.round(v*(0.82+(r()-.5)*.04)));   // A3 应用活跃（任一 App 会话）
   d.wau3=d.wau2.map(v=>Math.round(v*(0.56+(r()-.5)*.05)));
   d.proGift=d.cum.map((c,i)=>Math.round(d.newAct.slice(Math.max(0,i-12),i+1).reduce((a,b)=>a+b,0)*0.78));
   d.proPaid=[]; let p=(k==='intl'?24:11);
@@ -217,9 +217,9 @@ const FREQ={labels:['0','1','2','3','4','5+'],vals:[38,22,16,11,7,6]};
 const GIFT={labels:['赠 1 个月','赠 3 个月','赠 6 个月','赠 12 个月'],conv:[12,22,31,38],n:[178,252,126,48]};
 const AIH={labels:['0–20%','20–40%','40–60%','60–80%','80–99%','触顶'],plus:[41,23,14,9,7,6],pro:[18,20,22,18,13,9]};
 const SEG={labels:WK.slice(8).map(w=>w.label),
-  heavy:[4,4,5,5,5,5,5,6,6,6,6,6],power:[7,7,7,8,8,8,8,8,9,9,9,9],
-  regular:[21,21,21,21,21,21,22,22,22,21,21,21],light:[27,27,26,26,26,25,25,24,24,24,24,24],
-  dormant:[22,22,22,21,21,21,20,21,20,21,21,21],churn:[19,19,19,19,19,20,20,19,19,20,19,19]};
+  heavy:[13,13,13,14,14,14,15,15,15,16,16,17],
+  regular:[39,39,39,40,40,40,40,41,41,41,41,41],
+  light:[48,48,48,46,46,46,45,44,44,43,43,42]};
 const FW={labels:['v2.4.0','v2.4.1','v2.5.0','v2.5.1(新)'],vals:[6,14,31,49]};
 const DELAY={labels:['<1 分','1–60 分','1–24 时','1–3 天','3–7 天','>7 天(丢弃)'],vals:[61,17,12,6,3,1]};
 
@@ -324,7 +324,7 @@ function heatmap(host,{rows,cols,title}){
       const dark=idx>=3&&!small;
       if(cw>=40)el('text',{x:lw+cw*j+cw/2,y:yy+ch/2+4,'text-anchor':'middle','font-size':10,
         fill:small?cvar('--muted'):(dark?'#fff':cvar('--ink')),'pointer-events':'none'},svg).textContent=Math.round(v*100);
-      rc.addEventListener('mousemove',ev=>showTT(`<b>cohort ${r.label} · ${cols[j]}</b><div class="row">A4 运动留存<span class="v">${Math.round(v*100)}%</span></div><div class="row">样本<span class="v">${fmt(r.n)}${small?'（<100 灰显）':''}</span></div>`,ev.clientX,ev.clientY));
+      rc.addEventListener('mousemove',ev=>showTT(`<b>cohort ${r.label} · ${cols[j]}</b><div class="row">A4 训练留存<span class="v">${Math.round(v*100)}%</span></div><div class="row">样本<span class="v">${fmt(r.n)}${small?'（<100 灰显）':''}</span></div>`,ev.clientX,ev.clientY));
       rc.addEventListener('mouseleave',hideTT);
     });
   });
@@ -349,22 +349,22 @@ const INFO={
 'ACT02':{n:'已绑定激活账号数',u:'账号 · UV',d:'历史上完成过 ≥1 台 ATOM 首绑的账号。',c:'是留存 cohort 与会员渗透率的统一分母。'},
 'ACT05':{n:'注册→绑定转化率',u:'% · 账号 UV',d:'App 注册后 7 天内完成首绑的账号占比。',c:'分母是注册账号，不是设备；差值池含"买前研究"与"绑定失败"两种成分。'},
 'ACT06':{n:'户均设备数',u:'台/账号',d:'账号名下已绑定设备的平均数；多机账号占比 = P(≥2 台)。',c:''},
-'ENG01':{n:'四层活跃矩阵',u:'账号 · UV（括号 = 活跃率 %）',d:'{日/周(滚7)/月(滚28)} × {A1 开机/A2 联网/A3 应用使用/A4 运动}；活跃率 = ÷ 已绑定激活账号（ACT02），R 后缀。A3 = 任一 App 会话（桌面/语音/运动均计）。',c:'严格嵌套 A4⊆A3⊆A2⊆A1（App 会话需联网上报；相册等离线浏览计 A1）；A3−A4 = 纯桌面陪伴（ENG18）；A1 近 7 日回填。'},
-'ENG18':{n:'纯桌面陪伴账号',u:'账号 · UV（WAU 口径）',d:'A3 应用使用 − A4 运动：用了 App 但没训练的账号——"桌搭场景"的规模读数。',c:'与 ENG16 的 DESK 曲线互为印证；这不是坏事，是产品第二场景。'},
+'ENG01':{n:'四层活跃矩阵',u:'账号 · UV（括号 = 活跃率 %）',d:'{日/周(滚7)/月(滚28)} × {A1 开机/A2 联网/A3 应用活跃/A4 训练}；活跃率 = ÷ 已绑定激活账号（ACT02），R 后缀。A3 = 任一 App 会话（桌面/语音/运动均计）。',c:'严格嵌套 A4⊆A3⊆A2⊆A1（App 会话需联网上报；相册等离线浏览计 A1）；A3−A4 = 纯桌面陪伴（ENG18）；A1 近 7 日回填。'},
+'ENG18':{n:'纯桌面陪伴账号',u:'账号 · UV（WAU 口径）',d:'A3 应用活跃 − A4 训练：用了 App 但没训练的账号——"桌搭场景"的规模读数。',c:'与 ENG16 的 DESK 曲线互为印证；这不是坏事，是产品第二场景。'},
 'ENG08':{n:'WAU-Workout（NSM-1）',u:'账号/周 · UV',d:'自然滚动 7 日内完成 ≥1 次有效训练的账号数；配套活跃率（ENG08R）= ÷ 已绑定激活账号。基数增长期绝对值永远向上，活跃率才暴露参与度变化——两个都要看。',c:'计人不计次——一人练 10 次也是 1；"周训练总次数"是另一个指标（PV）。'},
-'ENG10':{n:'运动转化率',u:'% · 账号 UV',d:'WAU-A4 ÷ WAU-A1：开机的人里有多少真的练了。',c:'用周窗口算，不是 DAU 比值；低 = 用户被劝退（找课难/内容不合适）。'},
-'ENG13':{n:'周均有效训练次数',u:'次/账号/周 · PV÷UV',d:'总有效训练次数 ÷ 周运动活跃账号数。',c:'均值会被重度用户拉高——判断请看频次分布直方图。'},
-'ENG14':{n:'用户分层（D29）',u:'账号 · UV · MECE 六档',d:'近 28 天有效训练次数：重度 Heavy ≥12（周3+）/ Power 8–11（一周两练）/ Regular 4–7 / Light 1–3 / Dormant 0 次有开机 / Churned 无活跃。对外「Power User 率」= ≥8 次占比（Power+重度）。',c:'Dormant ≠ Churned：前者还在开机（可召回），后者彻底沉默；仅计身体运动类有效训练。'},
+'ENG10':{n:'训练转化率',u:'% · 账号 UV',d:'WAU-A4 ÷ WAU-A1：开机的人里有多少真的练了。',c:'用周窗口算，不是 DAU 比值；低 = 用户被劝退（找课难/内容不合适）。'},
+'ENG13':{n:'周均有效训练次数',u:'次/账号/周 · PV÷UV',d:'总有效训练次数 ÷ 周训练活跃账号数。',c:'均值会被重度用户拉高——判断请看频次分布直方图。'},
+'ENG14':{n:'用户分层（D38 三档）',u:'账号 · UV · 三档 MECE',d:'近 28 天（≈一个月）有效训练次数：重度 ≥10 次 / 常规 4–9 次 / 轻度 1–3 次；0 次不入档（沉默账号见 ENG15）。',c:'取代旧六档与「Power User 率」（D38）；仅计身体运动类有效训练；三档加总 = 近 28 天有训练的账号数，非全量账号。'},
 'ENG16':{n:'分 App 类活跃',u:'账号 · UV · 类间可重叠',d:'{DAU/WAU} × app_category：身体运动 PHYSICAL / 桌面参与 DESK / 语音把玩 AMBIENT。',c:'非 MECE——同一账号可同日用多类 App，各类分别去重；只有 PHYSICAL 计入 A3 与有效训练。'},
 'ENG15':{n:'静默账号',u:'账号 · UV',d:'近 28 天无任何 A1 开机的已激活账号。',c:'设备还在用户家里——是可召回资产，不是流失定论。'},
 'RET01':{n:'周 Cohort 留存率',u:'% · 账号 UV',d:'按首次绑定激活的 ISO 周分组，第 n 周内有过活跃的账号占比（区间留存）。',c:'≠ 第 n 天当天留存（那是 D1/D7/D30 精确日留存）；样本 <100 账号的格子灰显不作判断。'},
 'RET02':{n:'月 Cohort 留存率',u:'% · 账号 UV',d:'按激活月分组的区间留存，2026-04 起。',c:''},
 'RET04':{n:'Quick Ratio',u:'比值 · 账号 UV',d:'(新增活跃 + 复活) ÷ 流失，周/月两粒度。',c:'总量在涨它也可能逼近 1——那说明增长全靠新销量填流失的坑。<1 = 净流失。'},
 'RET05':{n:'复活率',u:'% · 账号 UV',d:'沉默 ≥28 天的账号中本期回归的比例。',c:'配合看复活后 4 周留存——复活即再沉默说明召回只是打扰。'},
-'RET06':{n:'首周 ≥2 次占比',u:'% · 账号 UV',d:'激活后 7 天内完成 ≥2 次有效训练（仅身体运动类）的账号占比——Aha 前导指标，阈值与 Power=一周两练对齐（D30）。',c:'阈值原为 3 次，2026-08-18 调整为 2 次——趋势图上打口径变更标注。'},
-'TRN03':{n:'完成率',u:'% · 课次 PV',d:'完成次数 ÷ 开始次数，按课型和单课分别看。',c:'分母是"次"不是"人"；点开 10 秒就退也计入开始。'},
+'RET06':{n:'首周 ≥2 次占比',u:'% · 账号 UV',d:'激活后 7 天内完成 ≥2 次有效训练（仅身体运动类）的账号占比——Aha 前导指标（D30）。',c:'阈值原为 3 次，2026-08-18 调整为 2 次——趋势图上打口径变更标注。'},
+'TRN03':{n:'完成率',u:'% · 课次 PV',d:'完成次数 ÷ 开始次数，按时长课型和单课分别看。',c:'分母是"次"不是"人"；点开 10 秒就退也计入开始。'},
 'TRN06':{n:'Time to First Workout',u:'天 · 账号 UV',d:'首次绑定 → 首次有效训练的时长，报中位数。',c:'长尾看 P90；>7 天未开练的账号是 onboarding 干预对象。'},
-'TRN08':{n:'课型 Mix',u:'课次占比 · PV',d:'大课/短课/微课的课次结构占比。',c:'三类课不等价，禁止简单加总课次做 KPI；合并视角用时长/组数加权。'},
+'TRN08':{n:'时长课型 Mix',u:'课次占比 · PV',d:'长课（>15 分钟）/小课（5～15 分钟，含两端）/短练（<5 分钟）的课次结构占比。字段 workout_length_type：long/short/mini（内容侧逐课打标，D37）。',c:'三类课不等价，禁止简单加总课次做 KPI；合并视角用时长/组数加权；原拟字段名 workout_type 已被「课程类型」占用。'},
 'TRN09':{n:'深度训练占比',u:'% · 次 PV',d:'单次 ≥2 完整组且 ≥5 分钟的训练 ÷ 全部有效训练。',c:'有效训练门槛低（1 组或 1 分钟）是刻意的——质量靠这个指标分层，不靠门槛。'},
 'TRN13':{n:'连续周 Streak',u:'周 · 账号 UV',d:'连续每周 ≥1 次有效训练的周数。',c:'断一周即清零；Streak ≥8 周的用户几乎不流失。'},
 'TRN14':{n:'内容库消耗率',u:'% · 账号 UV',d:'账号已练过的课程 ÷ 可用课程库（分 CN/INTL 内容库）。',c:'>70% 的高消耗用户是会员流失的头号先行信号。'},
@@ -378,7 +378,7 @@ const INFO={
 'SUB08':{n:'续费率',u:'% · 付费账号 UV',d:'自费 Pro 到期时完成续费的比例。',c:'首次续费与二次续费必须分开——首续是生死线。'},
 'SUB10':{n:'cancel_pending 占比',u:'% · 付费账号 UV',d:'已关闭自动续费但权益仍在期的账号占比。',c:'仍计入活跃付费 Pro（权益有效）——它是流失的先行指标，比到期流失早一个账期报警。'},
 'SUB13':{n:'会员在订时长 tenure',u:'月 · 账号 UV',d:'自费 Pro 账号的累计在订月数（分布 + 均值）。',c:'金额未接入前的 LTV 代理：付费人数 × 在订时长 × Pro 占比。'},
-'SUB16':{n:'高频 Plus 池',u:'账号 · UV',d:'周均 ≥2 次训练（= Power 口径）但未付费的 Plus 账号。',c:'最优质的 Pro 转化名单——练起来的人才会买。'},
+'SUB16':{n:'高频 Plus 池',u:'账号 · UV',d:'周均 ≥2 次训练但未付费的 Plus 账号。',c:'最优质的 Pro 转化名单——练起来的人才会买。'},
 'DEV01':{n:'设备在线率',u:'% · 台 UV',d:'当日联网设备 ÷ 近 28 天有开机的设备。',c:'分母不是累计激活台数——吃灰设备不该拉低在线率。'},
 'DEV05':{n:'补传延迟分布',u:'事件 · PV',d:'开机事件从发生到上传的延迟分布（7 天窗口内）。',c:'>7 天迟到的事件不入指标、留档监控（DEV06）——量级升高 = 固件补传策略异常。'},
 };
@@ -408,7 +408,7 @@ ov:`
  <div class="card"><h3>留存（RET）</h3><div id="cl4"></div></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><div class="hrow"><h3>四层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（ACT02 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 应用',c:'--a3',line:1},{n:'A4 运动',c:'--a4',line:1}])}<figure><div id="c_wau"></div></figure></div>
+ <div class="card"><div class="hrow"><h3>四层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（ACT02 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 应用',c:'--a3',line:1},{n:'A4 训练',c:'--a4',line:1}])}<figure><div id="c_wau"></div></figure></div>
  <div class="card"><h3>会员结构（周末快照）</h3><p class="sub">单位：账号数（UV 快照，状态互斥：Plus 不含 Pro 在期）</p>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem"></div><figcaption>Plus 随设备终身免费；会员生意的看点在 Pro 两档。</figcaption></figure></div>
 </div>
 <div class="card" style="margin-top:14px"><h3>需要关注（自动告警）</h3><div id="alerts"></div></div>`,
@@ -435,17 +435,17 @@ act:`
 eng:`
 <div class="card"><h3>4 × 3 活跃矩阵（ENG01）</h3><p class="sub">单位：账号数（UV，user_id 去重，PT 日界）</p><div id="mtx"></div></div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><div class="hrow"><h3>四层活跃 WAU</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 应用',c:'--a3',line:1},{n:'A4 运动',c:'--a4',line:1}])}<figure><div id="c_wau2"></div><figcaption>A4/A1 = 运动转化率（开机却没练 = 被劝退）；A3 − A4 = 纯桌面陪伴账号（ENG18）；A2/A1 = 联网健康率。</figcaption></figure></div>
+ <div class="card"><div class="hrow"><h3>四层活跃 WAU</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 应用',c:'--a3',line:1},{n:'A4 训练',c:'--a4',line:1}])}<figure><div id="c_wau2"></div><figcaption>A4/A1 = 训练转化率（开机却没练 = 被劝退）；A3 − A4 = 纯桌面陪伴账号（ENG18）；A2/A1 = 联网健康率。</figcaption></figure></div>
  <div class="card"><h3>周训练频次分布（ENG12）</h3><p class="sub">横轴 = 周有效训练次数 · 纵轴 = 账号占比 %（UV）· 本周</p><figure><div id="c_freq"></div><figcaption>均值 2.1 次/周——但分布显示 38% 的周活跃账号本周 0 训练。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>用户分层占比（ENG14 · 近 28 天有效训练次数）</h3><p class="sub">单位：账号占比 %（UV）· MECE 六档</p>${L([{n:'重度 ≥12（周3+）',c:'--seq7'},{n:'Power 8–11（一周两练）',c:'--seq5'},{n:'Regular 4–7',c:'--seq3'},{n:'Light 1–3',c:'--seq2'},{n:'Dormant',c:'--seq1'},{n:'Churned',c:'--grid'}])}<figure><div id="c_seg"></div><figcaption>对外口径「Power User 率」= ≥8 次占比（Power + 重度）。Power 层是 Pro 的天然候选池。</figcaption></figure></div>
+ <div class="card"><h3>用户分层占比（ENG14 · 近 28 天有效训练次数）</h3><p class="sub">单位：账号占比 %（UV）· 三档 MECE（D38；0 次不入档）</p>${L([{n:'重度 ≥10 次/月',c:'--seq7'},{n:'常规 4–9 次',c:'--seq4'},{n:'轻度 1–3 次',c:'--seq2'}])}<figure><div id="c_seg"></div><figcaption>三档加总 = 近 28 天有训练的账号；0 次不入档（沉默账号见 ENG15）。重度层是 Pro 的天然候选池。</figcaption></figure></div>
  <div class="card"><h3>分 App 类周活跃（ENG16 · WAU）</h3><p class="sub">账号（UV）· 类间可重叠（同一账号可同时用多类 App）</p><figure><div id="c_appcat"></div><figcaption>只有身体运动类（Workout/跳绳/One Set）计入 A3 与有效训练；桌面参与类（抬头番茄）另计参与时长（ENG17，阈值待 R19）。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>活跃健康（ENG）</h3><table class="dt">
   <tr><th>指标</th><th>本周</th><th>上周</th></tr>
-  <tr><td>运动转化率 A4/A1（ENG10）</td><td id="m_b10"></td><td class="note">—</td></tr>
+  <tr><td>训练转化率 A4/A1（ENG10）</td><td id="m_b10"></td><td class="note">—</td></tr>
   <tr><td>联网健康率 A2/A1（ENG11）</td><td id="m_b11"></td><td class="note">—</td></tr>
   <tr><td>周均有效训练次数（ENG13 · 次/账号/周）</td><td>2.1</td><td>2.0</td></tr>
   <tr><td>WAU / MAU</td><td>61%</td><td>60%</td></tr>
@@ -454,9 +454,9 @@ eng:`
 </div>`,
 ret:`
 <div class="grid g2">
- <div class="card"><h3>周 Cohort · A4 运动留存（RET01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = 留存率 %（账号 UV）。样本 &lt;100 账号灰显。</p><figure><div id="c_coh"></div><figcaption><b>关键观察点：W2 / W3 / W4 / W8</b>（D30）。周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
- <div class="card"><h3>月 Cohort · A4 运动留存（RET02）</h3><p class="sub">2026-04 起 · 数字 = 留存率 %（账号 UV）</p><figure><div id="c_cohm"></div></figure>
- <h3 style="margin-top:16px">Aha 前导（RET06 · 阈值 = 首周 ≥2 次，与 Power 口径对齐）</h3><table class="dt">
+ <div class="card"><h3>周 Cohort · A4 训练留存（RET01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = 留存率 %（账号 UV）。样本 &lt;100 账号灰显。</p><figure><div id="c_coh"></div><figcaption><b>关键观察点：W2 / W3 / W4 / W8</b>（D30）。周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
+ <div class="card"><h3>月 Cohort · A4 训练留存（RET02）</h3><p class="sub">2026-04 起 · 数字 = 留存率 %（账号 UV）</p><figure><div id="c_cohm"></div></figure>
+ <h3 style="margin-top:16px">Aha 前导（RET06 · 阈值 = 首周 ≥2 次）</h3><table class="dt">
   <tr><th>首周训练次数</th><th>占比</th><th>W12 留存</th></tr>
   <tr><td>0 次</td><td>31%</td><td>9%</td></tr>
   <tr><td>1 次</td><td>26%</td><td>15%</td></tr>
@@ -482,8 +482,8 @@ wk:`
  ${kpi('w4','首课完成率','TRN07 · %（账号的第一次 session）')}
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>课型结构 · 每周课次（TRN08 Mix）</h3><p class="sub">单位：课次（PV，不去重）——同一账号多次上课累计</p>${L([{n:'大课 20–30 min',c:'--seq6'},{n:'短课 5–10 min',c:'--seq4'},{n:'微课 1–2 min',c:'--seq2'}])}<figure><div id="c_mix"></div><figcaption>三类分开统计不加总；观察微课→大课进阶 or 大课→微课退坡。</figcaption></figure></div>
- <div class="card"><h3>完成率（TRN03 · 按课型）</h3><p class="sub">完成次 ÷ 开始次（课次 PV 口径）</p><figure><div id="c_comp"></div></figure>
+ <div class="card"><h3>时长课型结构 · 每周课次（TRN08 Mix）</h3><p class="sub">单位：课次（PV，不去重）——同一账号多次上课累计</p>${L([{n:'长课 >15 min',c:'--seq6'},{n:'小课 5–15 min',c:'--seq4'},{n:'短练 <5 min',c:'--seq2'}])}<figure><div id="c_mix"></div><figcaption>三类分开统计不加总；观察短练→长课进阶 or 长课→短练退坡。</figcaption></figure></div>
+ <div class="card"><h3>完成率（TRN03 · 按时长课型）</h3><p class="sub">完成次 ÷ 开始次（课次 PV 口径）</p><figure><div id="c_comp"></div></figure>
  <table class="dt" style="margin-top:10px">
   <tr><th>质量指标</th><th>值</th></tr>
   <tr><td>组完成率（TRN10）</td><td>84%（低 = 太难在劝退）</td></tr>
@@ -493,22 +493,22 @@ wk:`
  </table></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>分 App 使用统计（TRN19 · 本周）</h3><p class="sub">starts（次 PV）· 括号 = 周活跃账号（UV）· by app_id</p><figure><div id="c_apps"></div><figcaption>课型看意图结构，app_id 看单品——跳绳/One Set/抬头番茄各自成块；课程内容排行按应用组织（D34）。</figcaption></figure></div>
+ <div class="card"><h3>分 App 使用统计（TRN19 · 本周）</h3><p class="sub">starts（次 PV）· 括号 = 周活跃账号（UV）· by app_id</p><figure><div id="c_apps"></div><figcaption>时长课型看意图结构，app_id 看单品——跳绳/One Set/抬头番茄各自成块；课程内容排行按应用组织（D34）。</figcaption></figure></div>
  <div class="card"><h3>口径备忘（D33）</h3><table class="dt">
   <tr><th>项</th><th>约定</th></tr>
-  <tr><td>课型</td><td>课程属性打标（workout_type），= 用户<b>意图</b>维度</td></tr>
-  <tr><td>实际维度</td><td>实际训练时长 / 完成度，与课型<b>正交</b>——"总点大课上不完"与"只上微课完成率高"是两个故事</td></tr>
+  <tr><td>时长课型</td><td>课程属性打标（<b>workout_length_type</b>：mini 短练 &lt;5min / short 小课 5–15min 含两端 / long 长课 &gt;15min；原拟 workout_type 已被「课程类型」占用，D37），= 用户<b>意图</b>维度</td></tr>
+  <tr><td>实际维度</td><td>实际训练时长 / 完成度，与时长课型<b>正交</b>——"总点长课上不完"与"只上短练完成率高"是两个故事</td></tr>
   <tr><td>完成阈值</td><td>完成度 ≥ 70%（占位，待 R20 定 60/70/80）；&lt;10% = 即点即退</td></tr>
-  <tr><td>set 归一化</td><td>1 组 ≈ 1 分钟/10 次——跨 App 跨课型的统一度量</td></tr>
-  <tr><td>人均实际时长</td><td>TRN20 · 客观读数，不论课型；解读时次数优先于时长</td></tr>
+  <tr><td>set 归一化</td><td>1 组 ≈ 1 分钟/10 次——跨 App 跨时长课型的统一度量</td></tr>
+  <tr><td>人均实际时长</td><td>TRN20 · 客观读数，不论时长课型；解读时次数优先于时长</td></tr>
  </table></div>
 </div>
 <div class="card" style="margin-top:14px"><h3>课程内容 Top / Bottom（TRN14/TRN15 · 按应用组织）</h3>
-<table class="dt"><tr><th>课程</th><th>课型</th><th>开始数（次 PV）</th><th>完成率</th><th>复练率（账号 UV）</th></tr>
-<tr><td>全身燃脂 HIIT 25'</td><td>大课</td><td>1,140</td><td>72%</td><td>34%</td></tr>
-<tr><td>核心激活 8'</td><td>短课</td><td>980</td><td>81%</td><td>41%</td></tr>
-<tr><td>跳绳间歇 2'</td><td>微课</td><td>1,690</td><td>93%</td><td>57%</td></tr>
-<tr><td>肩背矫正 22'</td><td>大课</td><td>290</td><td style="color:var(--crit)">48%</td><td>12%</td></tr></table>
+<table class="dt"><tr><th>课程</th><th>时长课型</th><th>开始数（次 PV）</th><th>完成率</th><th>复练率（账号 UV）</th></tr>
+<tr><td>全身燃脂 HIIT 25'</td><td>长课</td><td>1,140</td><td>72%</td><td>34%</td></tr>
+<tr><td>核心激活 8'</td><td>小课</td><td>980</td><td>81%</td><td>41%</td></tr>
+<tr><td>跳绳间歇 2'</td><td>短练</td><td>1,690</td><td>93%</td><td>57%</td></tr>
+<tr><td>肩背矫正 22'</td><td>长课</td><td>290</td><td style="color:var(--crit)">48%</td><td>12%</td></tr></table>
 <p class="note" style="margin-top:8px">内容库消耗率（TRN14）：高消耗用户（&gt;70% 已练）达 6.8%——会员流失头号前置信号，需内容排期跟上。</p></div>`,
 mem:`
 <div class="card" style="border-left:3px solid var(--warn)"><p class="note" style="margin:0"><b>开发优先级：后置（D35 会议决议）</b>——当前付费量级小（个位数订单），一期先做活跃与留存；本页为口径定义预览，字典 SUB 系口径全部保留，量级起来即可开工。</p></div>
@@ -558,8 +558,8 @@ doc:`
  <table class="dt"><tr><th>概念</th><th>口径</th></tr>
  <tr><td>A1 开机活跃</td><td>名下任一设备有开机/物理交互（可离线，含相册本地浏览）</td></tr>
  <tr><td>A2 联网活跃</td><td>与云端有有效心跳；A2 ⊆ A1</td></tr>
- <tr><td>A3 应用使用</td><td>任一 App 会话（桌面/语音/运动均计）；A3 ⊆ A2</td></tr>
- <tr><td>A4 运动活跃</td><td>≥1 次有效训练（仅 PHYSICAL）；A4 ⊆ A3；A3−A4 = 纯桌面陪伴</td></tr>
+ <tr><td>A3 应用活跃</td><td>任一 App 会话（桌面/语音/运动均计）；A3 ⊆ A2</td></tr>
+ <tr><td>A4 训练活跃</td><td>≥1 次有效训练（仅 PHYSICAL）；A4 ⊆ A3；A3−A4 = 纯桌面陪伴</td></tr>
  <tr><td>有效训练</td><td>≥1 完整组（完成即计，次数不限）或 ≥1 分钟</td></tr>
  <tr><td>FREE → PLUS</td><td>首次绑定 ATOM 获得，<b>随账号终身保留</b>（解绑不回落）</td></tr>
  <tr><td>PRO_GIFT</td><td>套装赠送 1–12 个月，<b>需用户自行兑换</b></td></tr>
@@ -585,7 +585,7 @@ doc:`
  <div class="card"><h3>维度分类（三类，别混）</h3>
  <table class="dt"><tr><th>类</th><th>清单</th><th>校验要点</th></tr>
  <tr><td><b>交叉维度</b><br><span class="note">任何指标可切</span></td><td>时间（日/ISO 周/月）、product_line→国家、激活 cohort、渠道、SKU、固件、会员状态</td><td><b>可加性</b>：L2 指标切分后加总 = 总量；率类切分后须重算不可加总</td></tr>
- <tr><td><b>内生维度</b><br><span class="note">只属某族指标</span></td><td>活跃层级 A1/A2/A3、课型、赠送月数、用户分层、计费周期、权益来源</td><td><b>MECE</b>：各档互斥完备，分档加总 = 全量</td></tr>
+ <tr><td><b>内生维度</b><br><span class="note">只属某族指标</span></td><td>活跃层级 A1–A4、时长课型 mini/short/long、赠送月数、用户分层（D38 三档）、计费周期、权益来源</td><td><b>MECE</b>：各档互斥完备，分档加总 = 全量</td></tr>
  <tr><td><b>比例关系</b><br><span class="note">不是维度，是 L3 派生</span></td><td>活跃率（R 后缀）、各转化率、留存率、渗透率、完成率、Quick Ratio</td><td>分子口径域 ⊆ 分母；分子分母编号可查；<b>换分母必须换指标名</b></td></tr></table>
  <p class="note" style="margin-top:8px"><b>模块关系</b>：ENG / TRN / RET 同属「参与」域——<b>ENG 定性</b>（有没有练，UV 二值）、<b>TRN 定量</b>（练了多少多深，多为 PV）、RET 是参与的时间维展开。<b>命名提醒</b>：A1/A2/A3 = Active 活跃层级（ENG 的内生维度），与模块码 ACT（Activation）无关；比率 = R 后缀（ENG08R）；二期编号自 90 起。</p></div>
 </div>
@@ -633,7 +633,7 @@ function fillCharts(Mfull){
       ['累计激活设备','ACT03 · 台（设备 UV）· 硬件层',fmt(last(M.cum)),wow(M.cum)],
       ['本周新增激活','ACT04 · 台/周（设备 UV）',fmt(last(M.newAct)),wow(M.newAct)]]);
     rows('cl2',[['WAU-Workout ★','ENG08 · NSM-1 · 账号/周 · 括号=活跃率',fmt(last(M.wau3))+`<span style="font-size:12px;color:var(--muted)"> (${Math.round(last(M.wau3)/last(M.accts)*100)}%)</span>`,wow(M.wau3)],
-      ['运动转化率 A4/A1','ENG10 · %（账号 UV）',Math.round(last(M.wau3)/last(M.wau1)*100)+'%',0.4],
+      ['训练转化率 A4/A1','ENG10 · %（账号 UV）',Math.round(last(M.wau3)/last(M.wau1)*100)+'%',0.4],
       ['周均有效训练次数','ENG13 · 次/账号/周','2.1',5.0],
       ['深度训练占比','TRN09 · %（次 PV）','31%',0.6]]);
     rows('cl3',[['活跃付费 Pro ★','SUB02 · NSM-2 · 账号（UV）',fmt(last(M.proPaid)),wow(M.proPaid)],
@@ -646,7 +646,7 @@ function fillCharts(Mfull){
     const rateify=a=>a.map((v,i)=>+(v/M.accts[i]*100).toFixed(1));
     const wser=(nm,c,a)=>({name:nm,color:c,data:AMODE==='rate'?rateify(a):a});
     lineChart(document.getElementById('c_wau'),{labels:wl,series:[
-      wser('A1 开机','--a1',M.wau1),wser('A2 联网','--a2',M.wau2),wser('A3 应用','--a3',M.wauApp),wser('A4 运动','--a4',M.wau3)],
+      wser('A1 开机','--a1',M.wau1),wser('A2 联网','--a2',M.wau2),wser('A3 应用','--a3',M.wauApp),wser('A4 训练','--a4',M.wau3)],
       yFmt:AMODE==='rate'?(v=>Math.round(v)+'%'):fmt, ymax:AMODE==='rate'?80:null});
     stackChart(document.getElementById('c_mem'),{labels:wl,series:[
       {name:'Plus',color:'--plus',data:M.plus},{name:'Pro 赠送',color:'--progift',data:M.proGift},
@@ -654,7 +654,7 @@ function fillCharts(Mfull){
     document.getElementById('alerts').innerHTML=[
       ['⚠️','Quick Ratio 连续 6 周下行（1.42 → '+last(QRs).toFixed(2)+'）——新增在填流失的坑，关注 Dormant 召回。','warn'],
       ['⚠️','中国版 W'+ (33) +' 新增激活环比 −12%，渠道数据待核对。','warn'],
-      ['🔴','「肩背矫正 22\'」完成率 48%，显著低于大课均值 70%——建议内容组复盘。','crit'],
+      ['🔴','「肩背矫正 22\'」完成率 48%，显著低于长课均值 70%——建议内容组复盘。','crit'],
       ['✅','固件 v2.5.1 发布后，对应周 cohort W1 留存 +2.1pp。','good']
     ].map(a=>`<div class="alert"><span class="ic">${a[0]}</span><span>${a[1]}</span></div>`).join('');
   }
@@ -676,11 +676,11 @@ function fillCharts(Mfull){
       note:['ACT01 · 基准','ACT05 = 78%','ACT02']});
   }
   if(TAB==='eng'){
-    const rows=[['A1 开机','--a1',M.wau1,1.28,.60],['A2 联网','--a2',M.wau2,1.27,.61],['A3 应用','--a3',M.wauApp,1.30,.61],['A4 运动','--a4',M.wau3,1.42,.62]];
+    const rows=[['A1 开机','--a1',M.wau1,1.28,.60],['A2 联网','--a2',M.wau2,1.27,.61],['A3 应用','--a3',M.wauApp,1.30,.61],['A4 训练','--a4',M.wau3,1.42,.62]];
     const base=last(M.accts);
     const cell=v=>`${Math.round(v/base*100)}% <span class="note">(${fmt(v)})</span>`;
     document.getElementById('mtx').innerHTML='<table class="dt"><tr><th></th><th>DAU（昨日）</th><th>WAU（滚 7 日）</th><th>MAU（滚 28 日）</th><th>WAU/MAU</th></tr>'+
-      rows.map(r=>`<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${cvar(r[1])};margin-right:6px"></span>${r[0]}${r[0]==='A4 运动'?' <b style="color:var(--accent)">← NSM</b>':''}</td><td>${cell(Math.round(last(r[2])/2.6))}</td><td>${cell(last(r[2]))}</td><td>${cell(Math.round(last(r[2])*r[3]))}</td><td>${pct(r[4])}</td></tr>`).join('')+
+      rows.map(r=>`<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${cvar(r[1])};margin-right:6px"></span>${r[0]}${r[0]==='A4 训练'?' <b style="color:var(--accent)">← NSM</b>':''}</td><td>${cell(Math.round(last(r[2])/2.6))}</td><td>${cell(last(r[2]))}</td><td>${cell(Math.round(last(r[2])*r[3]))}</td><td>${pct(r[4])}</td></tr>`).join('')+
       `<tr><td class="note" colspan="5">每格 = 活跃率（括号内为账号数）· 活跃率 = ÷ 已绑定激活账号 ${fmt(base)}（ACT02 时点基数）</td></tr></table>`;
     const rateify=a=>a.map((v,i)=>+(v/M.accts[i]*100).toFixed(1));
     const wser=(nm,c,a)=>({name:nm,color:c,data:AMODE==='rate'?rateify(a):a});
@@ -691,11 +691,11 @@ function fillCharts(Mfull){
     const s0=Math.max(0,Math.max(R0,8)-8), s1=Math.max(s0,Math.min(R1,19)-8);
     const segCut=a=>a.slice(s0,s1+1);
     stackChart(document.getElementById('c_seg'),{labels:SEG.labels.slice(s0,s1+1),asPct:true,series:[
-      {name:'重度 ≥12',color:'--seq7',data:segCut(SEG.heavy)},{name:'Power 8–11',color:'--seq5',data:segCut(SEG.power)},
-      {name:'Regular 4–7',color:'--seq3',data:segCut(SEG.regular)},{name:'Light 1–3',color:'--seq2',data:segCut(SEG.light)},
-      {name:'Dormant',color:'--seq1',data:segCut(SEG.dormant)},{name:'Churned',color:'--grid',data:segCut(SEG.churn)}]});
+      {name:'重度 ≥10 次/月',color:'--seq7',data:segCut(SEG.heavy)},
+      {name:'常规 4–9 次',color:'--seq4',data:segCut(SEG.regular)},
+      {name:'轻度 1–3 次',color:'--seq2',data:segCut(SEG.light)}]});
     barH(document.getElementById('c_appcat'),{labels:['身体运动类','桌面参与类','语音交互与把玩'],
-      vals:[962,468,197],suffix:'',color:'--seq4',max:1100,note:['PHYSICAL · 计入 A3','DESK · 不计 A3','AMBIENT']});
+      vals:[962,468,197],suffix:'',color:'--seq4',max:1100,note:['PHYSICAL · 计入 A4','DESK · 计 A3 不计 A4','AMBIENT']});
     document.getElementById('m_b10').textContent=Math.round(last(M.wau3)/last(M.wau1)*100)+'%';
     document.getElementById('m_b11').textContent=Math.round(last(M.wau2)/last(M.wau1)*100)+'%';
   }
@@ -715,8 +715,8 @@ function fillCharts(Mfull){
     setKpi('w3','1.6 天',null,null,null);
     setKpi('w4','71%',0.5,[68,68,69,69,69,70,70,70,70,71,71,71],'--accent');
     stackChart(document.getElementById('c_mix'),{labels:wl,series:[
-      {name:'大课',color:'--seq6',data:M.sessW},{name:'短课',color:'--seq4',data:M.sessM},{name:'微课',color:'--seq2',data:M.sessm}]});
-    barH(document.getElementById('c_comp'),{labels:['大课','短课','微课'],vals:[68,76,91],color:'--seq4',max:100});
+      {name:'长课',color:'--seq6',data:M.sessW},{name:'小课',color:'--seq4',data:M.sessM},{name:'短练',color:'--seq2',data:M.sessm}]});
+    barH(document.getElementById('c_comp'),{labels:['长课','小课','短练'],vals:[68,76,91],color:'--seq4',max:100});
     barH(document.getElementById('c_apps'),{labels:['Workout 课程','桌面跳绳','One Set','抬头番茄'],
       vals:[1140,520,690,468],suffix:'',color:'--seq4',max:1300,
       note:['(586)','(233)','(300)','(468 · DESK)']});
