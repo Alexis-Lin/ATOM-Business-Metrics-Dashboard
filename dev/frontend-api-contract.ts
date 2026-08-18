@@ -36,12 +36,13 @@ export const WORKOUT_LENGTH_LABEL: Record<WorkoutLengthType, string> = {
 
 export type MembershipTier = 'FREE' | 'PLUS' | 'PRO_GIFT' | 'PRO_PAID';
 
-/** 用户分层（D38 · 三档，滚动 28 天窗口；0 次不入档） */
-export type UserTier = 'heavy' | 'regular' | 'light';
+/** 用户分层（D43 · 四档，滚动 28 天窗口；基数 = 有 A1 开机的账号，完全不开机不入档） */
+export type UserTier = 'heavy' | 'regular' | 'light' | 'zero';
 export const USER_TIER_LABEL: Record<UserTier, string> = {
   heavy: '重度（≥10 次/月）',
   regular: '常规（4–9 次/月）',
   light: '轻度（1–3 次/月）',
+  zero: '零训练（0 次，但有开机）',
 };
 
 export type Granularity = 'day' | 'week' | 'month';
@@ -97,7 +98,7 @@ export interface EngagementResponse {
   }>;
   deskGap: MetricSeries;             // ENG18 = A3 − A4
   deskCurve: MetricSeries;           // ENG16 DESK 类会话曲线
-  userTiers: Array<{ tier: UserTier; accounts: number }>; // ENG14（D38 三档）
+  userTiers: Array<{ tier: UserTier; accounts: number }>; // ENG14（D43 四档）
   silentAccounts: MetricSeries;      // ENG15
 }
 

@@ -24,6 +24,7 @@
       "SUB03": "Pro 在期渗透率——与 SUB04 区分度低，在期总量看 SUB01",
       "SUB07": "直接开通率——细分路径并入 SUB06 分组分析"
     },
+    "deferred_tabs": "SUB 会员 / DEV 设备 两个 Tab 一期置灰不开发（D44），口径全部保留",
     "ops_lists_offboard": "SUB14/15/16 为运营干预名单，不属看板指标（D41），转运营侧查询"
   },
   "metrics": [
@@ -39,7 +40,7 @@
     {"id":"ENG10","name":"训练转化率","module":"ENG","unit":"%","dedup":"ratio","layer":"L3","phase":"P1","star":true,"numerator":"WAU-a4","denominator":"WAU-a1"},
     {"id":"ENG11","name":"联网健康率","module":"ENG","unit":"%","dedup":"ratio","layer":"L3","phase":"P1","numerator":"WAU-a2","denominator":"WAU-a1"},
     {"id":"ENG12","name":"周频次分布","module":"ENG","unit":"账号占比","dedup":"user_uv","layer":"L3","phase":"P1","formula":"hist(周有效训练次数: 0/1/2/3/4/5+)"},
-    {"id":"ENG14","name":"用户分层","module":"ENG","unit":"账号","dedup":"user_uv","layer":"L3","phase":"P1","formula":"近28天有效训练次数，三档 MECE（D38）：heavy 重度>=10 / regular 常规 4-9 / light 轻度 1-3；0 次不入档（沉默用户见 ENG15）","note":"D38 取代旧五档（重/Power/常规/轻/沉默）；PowerUser 率随之退役"},
+    {"id":"ENG14","name":"用户分层","module":"ENG","unit":"账号","dedup":"user_uv","layer":"L3","phase":"P1","formula":"基数 = 近28天有 a1 开机的账号，四档 MECE（D43）：heavy 重度>=10 / regular 常规 4-9 / light 轻度 1-3 / zero 零训练（0 次但有开机）","note":"D43 在 D38 三档上加回零训练档；完全不开机的不入档（见 ENG15 静默）"},
     {"id":"ENG15","name":"静默账号","module":"ENG","unit":"账号","dedup":"user_uv","layer":"L2","phase":"P1","formula":"近28天 a1=0 的已激活账号"},
     {"id":"ENG16","name":"分 App 类活跃","module":"ENG","unit":"账号","dedup":"user_uv","layer":"L2","phase":"P1","formula":"{DAU,WAU} × app_category；类间可重叠（非 MECE）"},
     {"id":"ENG17","name":"桌面参与时长","module":"ENG","unit":"分钟","dedup":"pv","layer":"L2","phase":"P1","note":"DESK 类会话时长；判定阈值待 R19"},

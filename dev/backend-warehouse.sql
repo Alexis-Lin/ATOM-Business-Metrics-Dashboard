@@ -344,10 +344,11 @@ FROM (
 GROUP BY first_a4_date;
 
 -- ---------------------------------------------------------------------------
--- 3) ENG14 用户分层（D38 · 三档，滚动 28 天 ≈ 一个月）
+-- 3) ENG14 用户分层（D43 · 四档，滚动 28 天 ≈ 一个月）
 -- ---------------------------------------------------------------------------
+--   基数 = 近 28 天有 A1 开机的账号（完全不开机的不入档，走 ENG15 静默）。
 --   heavy 重度：≥10 次 | regular 常规：4–9 次 | light 轻度：1–3 次
---   0 次不入档（沉默用户走 ENG15）。
+--   | zero 零训练：0 次但有开机（开机/联网/用应用但没练）。
 SELECT tier, COUNT(*) AS accounts
 FROM (
   SELECT user_id,
@@ -355,12 +356,13 @@ FROM (
            WHEN SUM(qualified_workout_cnt) >= 10 THEN 'heavy'
            WHEN SUM(qualified_workout_cnt) >= 4  THEN 'regular'
            WHEN SUM(qualified_workout_cnt) >= 1  THEN 'light'
+           ELSE 'zero'
          END AS tier
   FROM agg_user_daily
   WHERE account_edition = :edition
     AND pt_date > :as_of_date - INTERVAL '28 days' AND pt_date <= :as_of_date
   GROUP BY user_id
-  HAVING SUM(qualified_workout_cnt) >= 1
+  HAVING BOOL_OR(a1_power_on)          -- 基数门槛：窗口内 ≥1 天开机
 ) t
 GROUP BY tier;
 
