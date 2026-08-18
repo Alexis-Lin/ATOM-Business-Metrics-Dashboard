@@ -156,7 +156,7 @@ a{color:var(--accent);}
   </nav>
 </div>
 <main id="main"></main>
-<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.1</i> ｜ 图内编号（ENG08、SUB06…）对应数据字典 v1.1 条目；标注"二期"的模块待外部接口。口径速记：<b>UV</b> = 去重（账号按 user_id / 设备按 device_id），<b>PV</b> = 次数累计不去重；未标注默认 UV-账号，详见「口径说明」Tab。筛选状态见右上角芯片。模块码：ACT = Activation 获取激活（账号注册 + 设备激活）· ENG = Engagement 活跃（定性）· RET 留存 · TRN 训练（定量）· SUB 会员 · DEV 设备；比率 = R 后缀（ENG08R）；二期编号自 90 起。A1/A2/A3 = 活跃层级（属 ENG），与 ACT 模块码无关。颜色约定：海外=蓝 · 中国=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
+<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.7</i> ｜ 图内编号（ENG08、SUB06…）对应数据字典条目；标注"二期"的模块待外部接口。口径速记：<b>UV</b> = 去重（账号按 user_id / 设备按 device_id），<b>PV</b> = 次数累计不去重；未标注默认 UV-账号，详见「口径说明」Tab。筛选状态见右上角芯片。模块码：ACT = Activation 获取激活（账号注册 + 设备激活）· ENG = Engagement 活跃（定性）· RET 留存 · TRN 训练（定量）· SUB 会员 · DEV 设备；比率 = R 后缀（ENG08R）；二期编号自 90 起。A1/A2/A3 = 活跃层级（属 ENG），与 ACT 模块码无关。颜色约定：海外=蓝 · 中国=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
 <div class="tt" id="tt"></div>
 
 <script>
@@ -395,20 +395,19 @@ function render(){
   const M=pick(PL);
   const sections={
 ov:`
-<div class="card"><h3>业务主漏斗 · 所选周期末累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div><p class="note" style="margin-top:6px"><b>口径</b>：全段均为去重（UV）——注册/训练/付费段 = 账号数，配对激活 = 设备台数；「首次有效训练」= 激活后<b>完成过 ≥1 次有效训练</b>（≥1 完整组或 ≥1 分钟）的账号，<b>计人不计次</b>——衡量"开箱后真的练起来了"的人数。售出 → 激活段（ACT90）随二期接入 Shopify 后补齐。</p></div>
-<div class="grid g3" style="margin-top:14px">
+<div class="card"><h3>业务主漏斗 · 所选周期末累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div><p class="note" style="margin-top:6px"><b>口径</b>：全段去重（UV）；「有效训练人数」= 激活后完成过 ≥1 次有效训练（≥1 完整组或 ≥1 分钟）的账号，计人不计次。售出段（ACT90）随二期接入 Shopify 后补齐。</p>
+<p class="note" style="margin-top:4px"><b>留存单列</b>（非漏斗段，随时间衰减）：激活账号 W4 运动留存 <b>58%</b> · W12 <b>34%</b> · Quick Ratio <b id="fn_qr"></b> —— 详见 留存 RET Tab。</p></div>
+<div class="grid g4" style="margin-top:14px">
  <div class="card"><h3>用户规模（ACT）</h3><div id="cl1"></div></div>
- <div class="card"><h3>活跃使用（ENG · RET）</h3><div id="cl2"></div></div>
+ <div class="card"><h3>活跃和训练（ENG · TRN）</h3><div id="cl2"></div></div>
  <div class="card"><h3>软件订阅（SUB）</h3><div id="cl3"></div></div>
+ <div class="card"><h3>留存（RET）</h3><div id="cl4"></div></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><div class="hrow"><h3>三层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（ACT02 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau"></div></figure></div>
  <div class="card"><h3>会员结构（周末快照）</h3><p class="sub">单位：账号数（UV 快照，状态互斥：Plus 不含 Pro 在期）</p>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem"></div><figcaption>Plus 随设备终身免费；会员生意的看点在 Pro 两档。</figcaption></figure></div>
 </div>
-<div class="grid g2" style="margin-top:14px">
- <div class="card"><h3>Quick Ratio（RET04 · 周）</h3><p class="sub">(New+Resurrected)/Churned；&lt;1 = 流失大于新增</p><figure><div id="c_qr"></div></figure></div>
- <div class="card"><h3>需要关注（自动告警）</h3><div id="alerts"></div></div>
-</div>`,
+<div class="card" style="margin-top:14px"><h3>需要关注（自动告警）</h3><div id="alerts"></div></div>`,
 act:`
 <div class="grid g4">
  ${kpi('a1','App 注册账号','ACT01 · 账号（UV）· 软件层')}
@@ -473,7 +472,7 @@ wk:`
  ${kpi('w1','本周有效训练次数','TRN · 次（PV，不去重）· ≥1 完整组或 ≥1 分钟')}
  ${kpi('w2','深度训练占比 ★','TRN09 · %（次 PV）· ≥2 组且≥5 分钟')}
  ${kpi('w3','Time to First Workout','TRN06 · 天（中位数，账号 UV）')}
- ${kpi('w4','自填负荷覆盖率','TRN16 · %（组记录 PV）')}
+ ${kpi('w4','首课完成率','TRN07 · %（账号的第一次 session）')}
 </div>
 <div class="grid g2" style="margin-top:14px">
  <div class="card"><h3>课型结构 · 每周课次（TRN08 Mix）</h3><p class="sub">单位：课次（PV，不去重）——同一账号多次上课累计</p>${L([{n:'大课 20–30 min',c:'--seq6'},{n:'短课 5–10 min',c:'--seq4'},{n:'微课 1–2 min',c:'--seq2'}])}<figure><div id="c_mix"></div><figcaption>三类分开统计不加总；观察微课→大课进阶 or 大课→微课退坡。</figcaption></figure></div>
@@ -601,26 +600,28 @@ function fillCharts(Mfull){
   const QRs=cut(QR);
   const wl=WK.slice(R0,R1+1).map(w=>w.label);
   if(TAB==='ov'){
-    const appReg=Math.round(last(M.cum)*1.25);
-    const f=[['App 注册',appReg,null],['配对激活',last(M.cum),'转化 80%'],['首次有效训练',Math.round(last(M.cum)*.81),'81%'],
-      ['首周≥3次',Math.round(last(M.cum)*.81*.28),'28%'],['W4 留存',Math.round(last(M.cum)*.81*.28*.62),'62%'],
-      ['Pro 付费',last(M.proPaid),'付费渗透 '+(last(M.proPaid)/last(M.cum)*100).toFixed(1)+'%']];
-    document.getElementById('funnel').innerHTML=f.map((s,i)=>
-      `<div class="fstage"><div class="n">${s[0]}</div><div class="v">${fmt(s[1])}</div><div class="r">${s[2]||'&nbsp;'}</div><div class="bar"><i style="width:${Math.round(s[1]/f[0][1]*100)}%"></i></div></div>`).join('');
-    const act10=Math.round(last(M.wau3)/last(M.wau1)*100);
     const appRegOv=Math.round(last(M.cum)*1.25);
+    const trained=Math.round(last(M.accts)*0.87);
+    const f=[['累计 App 注册','ACT01 · 账号',appRegOv,null],
+      ['设备激活数','ACT03 · 台',last(M.cum),'80%'],
+      ['有效训练人数','账号 · 计人不计次',trained,Math.round(trained/last(M.accts)*100)+'%'],
+      ['付费人数','SUB02 · 账号',last(M.proPaid),'付费渗透 '+(last(M.proPaid)/last(M.accts)*100).toFixed(1)+'%']];
+    document.getElementById('funnel').innerHTML=f.map(st=>
+      `<div class="fstage"><div class="n">${st[0]} <span class="note">${st[1]}</span></div><div class="v">${fmt(st[2])}</div><div class="r">${st[3]||'&nbsp;'}</div><div class="bar"><i style="width:${Math.round(st[2]/f[0][2]*100)}%"></i></div></div>`).join('');
     rows('cl1',[['App 注册账号（累计）','ACT01 · 账号（UV）· 软件层',fmt(appRegOv),0.9],
-      ['累计配对激活设备','ACT03 · gross · 台（设备 UV）· 硬件层',fmt(last(M.cum)),wow(M.cum)],
-      ['本周新增激活','ACT04 · 台/周（设备 UV）',fmt(last(M.newAct)),wow(M.newAct)],
-      ['注册 → 设备激活转化','ACT05 · %（账号 UV）· 7 日窗口','78%',-0.6]]);
-    rows('cl2',[['WAU-Workout ★','ENG08 · NSM-1 · 账号/周（UV）· 括号 = 活跃率',fmt(last(M.wau3))+`<span style="font-size:12px;color:var(--muted)"> (${Math.round(last(M.wau3)/last(M.accts)*100)}%)</span>`,wow(M.wau3)],
-      ['运动转化率 A3/A1','ENG10 · %（账号 UV）',act10+'%',0.4],
-      ['W4 运动留存','RET01 · %（账号 UV）· 最新周 cohort','58%',0.8],
-      ['Quick Ratio','RET04 · 比值（账号 UV）',last(QRs).toFixed(2),null]]);
-    rows('cl3',[['活跃付费 Pro ★','SUB02 · NSM-2 · 账号（UV）· 不含赠送',fmt(last(M.proPaid)),wow(M.proPaid)],
-      ['付费渗透率','SUB04 · %（账号 UV）',(last(M.proPaid)/last(M.cum)*100).toFixed(1)+'%',0.3],
-      ['赠送兑换率','SUB05 · %（账号 UV）','87%',1.0],
+      ['累计激活设备','ACT03 · 台（设备 UV）· 硬件层',fmt(last(M.cum)),wow(M.cum)],
+      ['本周新增激活','ACT04 · 台/周（设备 UV）',fmt(last(M.newAct)),wow(M.newAct)]]);
+    rows('cl2',[['WAU-Workout ★','ENG08 · NSM-1 · 账号/周 · 括号=活跃率',fmt(last(M.wau3))+`<span style="font-size:12px;color:var(--muted)"> (${Math.round(last(M.wau3)/last(M.accts)*100)}%)</span>`,wow(M.wau3)],
+      ['运动转化率 A3/A1','ENG10 · %（账号 UV）',Math.round(last(M.wau3)/last(M.wau1)*100)+'%',0.4],
+      ['周均有效训练次数','ENG13 · 次/账号/周','2.1',5.0],
+      ['深度训练占比','TRN09 · %（次 PV）','31%',0.6]]);
+    rows('cl3',[['活跃付费 Pro ★','SUB02 · NSM-2 · 账号（UV）',fmt(last(M.proPaid)),wow(M.proPaid)],
+      ['付费渗透率','SUB04 · %（账号 UV）',(last(M.proPaid)/last(M.accts)*100).toFixed(1)+'%',0.3],
       ['赠转付转化率','SUB06 · %（到期账号 UV）· 滚动 30 天','26%',1.2]]);
+    rows('cl4',[['W4 运动留存','RET01 · %（账号 UV）· 最新周 cohort','58%',0.8],
+      ['首周 ≥3 次占比','RET06 · %（Aha 前导）','28%',0.5],
+      ['Quick Ratio','RET04 · 比值（账号 UV）',last(QRs).toFixed(2),null]]);
+    document.getElementById('fn_qr').textContent=last(QRs).toFixed(2);
     const rateify=a=>a.map((v,i)=>+(v/M.accts[i]*100).toFixed(1));
     const wser=(nm,c,a)=>({name:nm,color:c,data:AMODE==='rate'?rateify(a):a});
     lineChart(document.getElementById('c_wau'),{labels:wl,series:[
@@ -629,7 +630,6 @@ function fillCharts(Mfull){
     stackChart(document.getElementById('c_mem'),{labels:wl,series:[
       {name:'Plus',color:'--plus',data:M.plus},{name:'Pro 赠送',color:'--progift',data:M.proGift},
       {name:'Pro 付费',color:'--propaid',data:M.proPaid}]});
-    lineChart(document.getElementById('c_qr'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QRs.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
     document.getElementById('alerts').innerHTML=[
       ['⚠️','Quick Ratio 连续 6 周下行（1.42 → '+last(QRs).toFixed(2)+'）——新增在填流失的坑，关注 Dormant 召回。','warn'],
       ['⚠️','中国版 W'+ (33) +' 新增激活环比 −12%，渠道数据待核对。','warn'],
@@ -690,7 +690,7 @@ function fillCharts(Mfull){
     setKpi('w1',fmt(SUM([last(M.sessW),last(M.sessM),last(M.sessm)])),2.4,M.sessW.map((v,i)=>v+M.sessM[i]+M.sessm[i]),'--accent');
     setKpi('w2','31%',0.6,[27,28,28,29,29,29,30,30,30,31,31,31],'--accent');
     setKpi('w3','1.6 天',null,null,null);
-    setKpi('w4','38%',1.1,[31,32,33,34,34,35,36,36,37,37,38,38],'--accent');
+    setKpi('w4','71%',0.5,[68,68,69,69,69,70,70,70,70,71,71,71],'--accent');
     stackChart(document.getElementById('c_mix'),{labels:wl,series:[
       {name:'大课',color:'--seq6',data:M.sessW},{name:'短课',color:'--seq4',data:M.sessM},{name:'微课',color:'--seq2',data:M.sessm}]});
     barH(document.getElementById('c_comp'),{labels:['大课','短课','微课'],vals:[68,76,91],color:'--seq4',max:100});
