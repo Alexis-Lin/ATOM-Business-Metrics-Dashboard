@@ -1,15 +1,15 @@
 /**
  * Atom 业务指标看板 · 前端 API 契约参考（v1.0）
  * ------------------------------------------------------------------
- * 对应：schema/metrics.json（指标注册表）+ backend/metrics.sql（推导口径）
- * 原型：prototype/dashboard.html —— 前端可直接复用该 HTML，把 mock 数据块
- *       替换为下述接口返回值即可（见 frontend/README.md 的挂载点说明）。
+ * 对应：metrics-registry.json（指标注册表）+ backend-warehouse.sql（推导口径）
+ * 原型：dashboard-prototype.html —— 前端可直接复用该 HTML，把 mock 数据块
+ *       替换为下述接口返回值即可（见本目录 README.md 的挂载点说明）。
  *
  * 约定：
  *  - 所有日期均为 PT（America/Los_Angeles）口径的日历日，格式 YYYY-MM-DD。
  *  - edition 是硬隔离分区：CN / INTL 各自独立系统；GLOBAL 仅指标数值合并，
  *    一期前端禁用（按钮 disabled），默认视图 INTL（海外）。
- *  - metricId 与 schema/metrics.json 的 id 一一对应（如 "ENG08"）。
+ *  - metricId 与 metrics-registry.json 的 id 一一对应（如 "ENG08"）。
  */
 
 // ---------- 基础枚举（与后端字段字典对齐） ----------
@@ -63,7 +63,7 @@ export interface MetricPoint {
 }
 
 export interface MetricSeries {
-  metricId: string;          // schema/metrics.json 的 id
+  metricId: string;          // metrics-registry.json 的 id
   name: string;
   unit: string;              // 账号 / 设备 / 次 / 分钟 / %
   dedup: DedupMode;
@@ -157,6 +157,6 @@ export const API_ENDPOINTS = {
   device: '/api/v1/device',
   /** 单指标透传：?metricId=ENG08&... 直接读 global_metrics_daily */
   metric: '/api/v1/metric',
-  /** 指标口径注册表：直接回传 schema/metrics.json，前端 ⓘ 提示与口径 Tab 数据源 */
+  /** 指标口径注册表：直接回传 metrics-registry.json，前端 ⓘ 提示与口径 Tab 数据源 */
   metricRegistry: '/api/v1/meta/metrics',
 } as const;

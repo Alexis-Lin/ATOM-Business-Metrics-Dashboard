@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://atom.bodypark.ai/schema/events.schema.json",
+  "$id": "https://atom.bodypark.ai/schema/tracking-events.schema.json",
   "title": "Atom L0 埋点事件 Schema（v1.0 · 对应数据字典 v2.0 Part C）",
   "description": "所有 L0 原始事件的公共信封 + 各事件 payload 定义。日界一律以 PT（America/Los_Angeles）在数仓侧换算，端上只上报 UTC 时间戳与设备本地时间。离线事件（开机等）允许最多 7 天回补：超过 7 天的迟到事件不进指标，归档至 late_events 并计入 DEV06 监控。",
   "$defs": {

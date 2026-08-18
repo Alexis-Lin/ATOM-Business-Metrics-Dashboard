@@ -2,7 +2,7 @@
 
 > **本文档是 Atom 商业业绩指标体系的口径 SSOT**：产品业务定义 + 指标字典 + 后台数据字段定义。
 > 战略框架见 [`atom-metrics-framework.md`](atom-metrics-framework.md)；账号档案字段 SSOT = [`ATOM-UserGoalPreference-and-OnBoarding`](https://github.com/Alexis-Lin/ATOM-UserGoalPreference-and-OnBoarding) 仓（下称档案仓）；计费/订单事实 SSOT = 订单系统。
-> 版本：v2.0（2026-08-18）｜ 第十轮修订：A3 更名**应用活跃**、A4 更名**训练活跃**（D37）；课程时长类型定名 **workout_length_type**（mini 短练 <5min / short 小课 5–15min 含两端 / long 长课 >15min，原 workout_type 已被『课程类型』占用）；用户分层简化为**轻/常规/重三档**（D38）；仓库新增统计字段定义（schema/）与前后端开发参考（backend/、frontend/）。
+> 版本：v2.0（2026-08-18）｜ 第十轮修订：A3 更名**应用活跃**、A4 更名**训练活跃**（D37）；课程时长类型定名 **workout_length_type**（mini 短练 <5min / short 小课 5–15min 含两端 / long 长课 >15min，原 workout_type 已被『课程类型』占用）；用户分层简化为**轻/常规/重三档**（D38）；仓库新增统计字段定义与前后端开发参考（统一收于 `dev/` 目录）。
 
 ## 0. 体系设计原则（结构化审视后确立）
 
@@ -280,7 +280,7 @@ FREE ──首次绑定 ATOM──▶ PLUS（账号终身免费，解绑设备�
 - `dim_content` 增加 **`workout_length_type`**（`mini` 短练 <5min / `short` 小课 5–15min 含两端 / `long` 长课 >15min）——内容侧逐课标注；原拟名 workout_type 因已被『课程类型』字段占用而改名（D37）。`session_start/end` 冗余快照该字段，统计以 dim_content 为准。
 - 一期**不接** `fct_sales_manual`（售出/退货）——REG P2 组与 DEV90 随 Shopify + 手工报表接口二期启用。
 
-> **机器可读定义（本仓库，v2.0 新增）**：埋点事件信封与 payload 见 `schema/events.schema.json`；指标注册表见 `schema/metrics.json`（看板 ⓘ 提示与口径 Tab 的单一数据源）。
+> **机器可读定义（本仓库，v2.0 新增）**：埋点事件信封与 payload 见 `dev/tracking-events.schema.json`；指标注册表见 `dev/metrics-registry.json`（看板 ⓘ 提示与口径 Tab 的单一数据源）。
 
 ### C3. 数仓模型
 
@@ -296,7 +296,7 @@ agg_user_daily        增加：mini/short/long_workout_cnt（按时长课型拆�
 （移除一期范围：fct_sales_manual）
 ```
 
-> **建表与推导 SQL 参考（本仓库，v2.0 新增）**：数仓 DDL 见 `backend/ddl.sql`；指标推导 SQL（基座构建、ENG01 矩阵、ENG08/08R、ACT05、ENG14 三档、RET01/RET06、TRN08/19、GLOBAL 汇总）见 `backend/metrics.sql`；前端接口契约与原型接数指引见 `frontend/api-contract.ts`、`frontend/README.md`。
+> **建表与推导 SQL 参考（本仓库，v2.0 新增）**：数仓 DDL 与指标推导 SQL（基座构建、ENG01 矩阵、ENG08/08R、ACT05、ENG14 三档、RET01/RET06、TRN08/19、GLOBAL 汇总）合并于 `dev/backend-warehouse.sql`；前端接口契约见 `dev/frontend-api-contract.ts`；原型接数指引见 `dev/README.md`。
 
 ### C4. 数据质量与治理
 
@@ -366,4 +366,4 @@ agg_user_daily        增加：mini/short/long_workout_cnt（按时长课型拆�
 
 **仍待拍板**：R16 赠送兑换有效期窗口；R17 Pro 计费周期与各区价格表；R18 App→分类映射表首版；R19 DESK 类"有效参与"判定阈值；**R20** 完课阈值（60/70/80%，暂按 70% 占位）；**R21** CN/INTL 数据归集中间表方案与时点（"全球"视图的前置）。
 
-*v2.0（2026-08-18）｜ v1.9 → v2.0：第十轮修订 D37–D38（A3/A4 更名、workout_length_type 三档、用户分层三档）；新增 schema/backend/frontend 开发参考。｜  v1.8 → v1.9：第九轮会议决议 D32–D36。｜  v1.7 → v1.8：D29 分层重定、D30 留存观察点与 Aha 阈值、D31 App 三分类。｜  v1.6 → v1.7：D28 总览简化。｜  v1.5 → v1.6：D27 展示排序与文案（ACT01–04 重排、三卡更名）。｜  v1.4 → v1.5：命名体系 v2（D25）、移除首次绑定成功率（D26）。｜  v1.3 → v1.4：新增 A-8 数据分层与维度分类；明确 ACT 定性 / TRN 定量同属参与域。｜  v1.2 → v1.3：活跃指标增加 -R 活跃率配套读法。｜ v1.1 → v1.2：新增 A-7 PV/UV 计数口径与单位规范。｜  v1.0 → v1.1：并入第四轮决议；指标编号改模块助记码并标注 P1/P2；新增 SUB05 兑换率与 SUB13 会员时长；活跃层 A1/A2/A3；销售依赖指标全部移入 P2。*
+*v2.0（2026-08-18）｜ v1.9 → v2.0：第十轮修订 D37–D38（A3/A4 更名、workout_length_type 三档、用户分层三档）；新增 dev/ 工程开发对接目录（统计字段定义 + 前后端参考）。｜  v1.8 → v1.9：第九轮会议决议 D32–D36。｜  v1.7 → v1.8：D29 分层重定、D30 留存观察点与 Aha 阈值、D31 App 三分类。｜  v1.6 → v1.7：D28 总览简化。｜  v1.5 → v1.6：D27 展示排序与文案（ACT01–04 重排、三卡更名）。｜  v1.4 → v1.5：命名体系 v2（D25）、移除首次绑定成功率（D26）。｜  v1.3 → v1.4：新增 A-8 数据分层与维度分类；明确 ACT 定性 / TRN 定量同属参与域。｜  v1.2 → v1.3：活跃指标增加 -R 活跃率配套读法。｜ v1.1 → v1.2：新增 A-7 PV/UV 计数口径与单位规范。｜  v1.0 → v1.1：并入第四轮决议；指标编号改模块助记码并标注 P1/P2；新增 SUB05 兑换率与 SUB13 会员时长；活跃层 A1/A2/A3；销售依赖指标全部移入 P2。*
