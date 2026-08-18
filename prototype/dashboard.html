@@ -378,7 +378,7 @@ const INFO={
 'DEV-01':{n:'设备在线率',u:'% · 台 UV',d:'当日联网设备 ÷ 近 28 天有开机的设备。',c:'分母不是累计激活台数——吃灰设备不该拉低在线率。'},
 'DEV-05':{n:'补传延迟分布',u:'事件 · PV',d:'开机事件从发生到上传的延迟分布（7 天窗口内）。',c:'>7 天迟到的事件不入指标、留档监控（DEV-06）——量级升高 = 固件补传策略异常。'},
 };
-let PL='all', TAB='ov', AMODE='abs', CTRY='all', R0=0, R1=NW-1, TR='all';
+let PL='all', TAB='ov', AMODE='rate', CTRY='all', R0=0, R1=NW-1, TR='all';
 const CTRY_SHARE={us:.44,jp:.16,de:.12,uk:.10,other:.18};
 const CTRY_NAME={all:'全部国家',us:'美国',jp:'日本',de:'德国',uk:'英国',other:'其他'};
 const main=document.getElementById('main');
@@ -402,7 +402,7 @@ ov:`
  <div class="card"><h3>变现 · 愿意付费吗</h3><div id="cl3"></div></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><div class="hrow"><h3>三层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（REG-04 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau"></div></figure></div>
+ <div class="card"><div class="hrow"><h3>三层活跃 WAU 趋势</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div><p class="sub">${AMODE==='abs'?'单位：账号数（UV，user_id 去重）':'活跃率 = 活跃账号 ÷ 已绑定激活账号（REG-04 · 同周基数）'}</p>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau"></div></figure></div>
  <div class="card"><h3>会员结构（周末快照）</h3><p class="sub">单位：账号数（UV 快照，状态互斥：Plus 不含 Pro 在期）</p>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem"></div><figcaption>Plus 随设备终身免费；会员生意的看点在 Pro 两档。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
@@ -433,7 +433,7 @@ act:`
 eng:`
 <div class="card"><h3>3 × 3 活跃矩阵（ACT-01–09）</h3><p class="sub">单位：账号数（UV，user_id 去重，PT 日界）</p><div id="mtx"></div></div>
 <div class="grid g2" style="margin-top:14px">
- <div class="card"><div class="hrow"><h3>三层活跃 WAU</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button></span></div>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau2"></div><figcaption>A3/A1 = 运动转化率（开机却没练 = 被劝退）；A2/A1 = 联网健康率。</figcaption></figure></div>
+ <div class="card"><div class="hrow"><h3>三层活跃 WAU</h3><span class="seg mini am" role="group" aria-label="绝对值或活跃率"><button data-am="rate" class="${AMODE==='rate'?'on':''}">活跃率</button><button data-am="abs" class="${AMODE==='abs'?'on':''}">账号数</button></span></div>${L([{n:'A1 开机',c:'--a1',line:1},{n:'A2 联网',c:'--a2',line:1},{n:'A3 运动',c:'--a3',line:1}])}<figure><div id="c_wau2"></div><figcaption>A3/A1 = 运动转化率（开机却没练 = 被劝退）；A2/A1 = 联网健康率。</figcaption></figure></div>
  <div class="card"><h3>周训练频次分布（ACT-12）</h3><p class="sub">横轴 = 周有效训练次数 · 纵轴 = 账号占比 %（UV）· 本周</p><figure><div id="c_freq"></div><figcaption>均值 2.1 次/周——但分布显示 38% 的周活跃账号本周 0 训练。</figcaption></figure></div>
 </div>
 <div class="grid g2" style="margin-top:14px">
@@ -444,7 +444,7 @@ eng:`
   <tr><td>联网健康率 A2/A1（ACT-11）</td><td id="m_b11"></td><td class="note">—</td></tr>
   <tr><td>周均有效训练次数（ACT-13 · 次/账号/周）</td><td>2.1</td><td>2.0</td></tr>
   <tr><td>WAU / MAU</td><td>61%</td><td>60%</td></tr>
-  <tr><td>静默账号（ACT-15 · 28 天无 A1）</td><td>172 账号（5.3%）</td><td class="note">可召回资产池</td></tr>
+  <tr><td>静默账号（ACT-15 · 28 天无 A1）</td><td>5.3%（172 账号）</td><td class="note">可召回资产池</td></tr>
  </table></div>
 </div>`,
 ret:`
@@ -597,7 +597,7 @@ function fillCharts(Mfull){
     rows('cl1',[['累计配对激活设备','REG-01 · gross · 台（设备 UV）',fmt(last(M.cum)),wow(M.cum)],
       ['本周新增激活','REG-02 · 台/周（设备 UV）',fmt(last(M.newAct)),wow(M.newAct)],
       ['App 注册 → 绑定转化','REG-05 · %（账号 UV）· 7 日窗口','78%',-0.6]]);
-    rows('cl2',[['WAU-Workout ★','ACT-08 · NSM-1 · 账号/周（UV）+ 活跃率',fmt(last(M.wau3))+` <span style="font-size:12px;color:var(--muted)">(${Math.round(last(M.wau3)/last(M.accts)*100)}%)</span>`,wow(M.wau3)],
+    rows('cl2',[['WAU-Workout ★','ACT-08-R · NSM-1 · 活跃率 %（括号 = 账号 UV）',Math.round(last(M.wau3)/last(M.accts)*100)+`% <span style="font-size:12px;color:var(--muted)">(${fmt(last(M.wau3))})</span>`,wow(M.wau3)],
       ['运动转化率 A3/A1','ACT-10 · %（账号 UV）',act10+'%',0.4],
       ['W4 运动留存','RET-01 · %（账号 UV）· 最新周 cohort','58%',0.8],
       ['Quick Ratio','RET-04 · 比值（账号 UV）',last(QRs).toFixed(2),null]]);
@@ -638,10 +638,10 @@ function fillCharts(Mfull){
   if(TAB==='eng'){
     const rows=[['A1 开机','--a1',M.wau1,1.28,.60],['A2 联网','--a2',M.wau2,1.27,.61],['A3 运动','--a3',M.wau3,1.42,.62]];
     const base=last(M.accts);
-    const cell=v=>`${fmt(v)} <span class="note">(${Math.round(v/base*100)}%)</span>`;
+    const cell=v=>`${Math.round(v/base*100)}% <span class="note">(${fmt(v)})</span>`;
     document.getElementById('mtx').innerHTML='<table class="dt"><tr><th></th><th>DAU（昨日）</th><th>WAU（滚 7 日）</th><th>MAU（滚 28 日）</th><th>WAU/MAU</th></tr>'+
       rows.map(r=>`<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${cvar(r[1])};margin-right:6px"></span>${r[0]}${r[0]==='A3 运动'?' <b style="color:var(--accent)">← NSM</b>':''}</td><td>${cell(Math.round(last(r[2])/2.6))}</td><td>${cell(last(r[2]))}</td><td>${cell(Math.round(last(r[2])*r[3]))}</td><td>${pct(r[4])}</td></tr>`).join('')+
-      `<tr><td class="note" colspan="5">每格 = 账号数（括号内为活跃率 = ÷ 已绑定激活账号 ${fmt(base)}，REG-04 时点基数）</td></tr></table>`;
+      `<tr><td class="note" colspan="5">每格 = 活跃率（括号内为账号数）· 活跃率 = ÷ 已绑定激活账号 ${fmt(base)}（REG-04 时点基数）</td></tr></table>`;
     const rateify=a=>a.map((v,i)=>+(v/M.accts[i]*100).toFixed(1));
     const wser=(nm,c,a)=>({name:nm,color:c,data:AMODE==='rate'?rateify(a):a});
     lineChart(document.getElementById('c_wau2'),{labels:wl,series:[
