@@ -116,7 +116,8 @@ CREATE TABLE fct_session (                -- A3/A4 依据：session_start+end �
   ai_active_sec       INTEGER     NOT NULL DEFAULT 0,  -- 开启 AI 识别跟练的时长 → TRN23
   completion_pct      NUMERIC(5,2),                -- 完课阈值占位 70%（R20）
   is_qualified_workout BOOLEAN    NOT NULL DEFAULT FALSE,
-      -- 有效训练判定（仅 PHYSICAL）：sets_completed >= 1 OR duration_sec >= 60
+      -- 有效训练判定（仅 PHYSICAL，D48）：sets_completed >= 0.6 × planned_set_cnt；
+      -- 组数不可判定（planned_set_cnt 空/0）时按 duration_sec >= 0.6 × dim_content.planned_duration_sec 兜底
   PRIMARY KEY (session_id)
 );
 
@@ -259,11 +260,17 @@ FROM (
   -- 会话（A3/A4）
   SELECT s.pt_date, s.user_id, s.account_edition,
          'session' AS src, a.app_category,
-         (a.app_category = 'PHYSICAL'
-          AND (s.sets_completed >= 1 OR s.duration_sec >= 60)) AS is_qualified,
+         (a.app_category = 'PHYSICAL' AND (            -- D48 有效训练判定
+            (COALESCE(s.planned_set_cnt,0) > 0
+             AND s.sets_completed >= 0.6 * s.planned_set_cnt)
+            OR (COALESCE(s.planned_set_cnt,0) = 0
+                AND COALESCE(c.planned_duration_sec,0) > 0
+                AND s.duration_sec >= 0.6 * c.planned_duration_sec)
+         )) AS is_qualified,
          s.duration_sec, s.sets_completed, s.workout_length_type
   FROM fct_session s
   JOIN dim_app a ON a.app_id = s.app_id
+  LEFT JOIN dim_content c ON c.content_id = s.content_id
 ) d
 JOIN dim_user u ON u.user_id = d.user_id
 WHERE d.pt_date = :run_date

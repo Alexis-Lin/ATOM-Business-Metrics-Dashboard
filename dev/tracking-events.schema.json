@@ -131,7 +131,7 @@
     },
     {
       "title": "session_end（应用会话结束）",
-      "description": "会话时长、完成度归档。PHYSICAL 类由此判定有效训练（≥1 完整组 或 ≥60 秒）→ A4。",
+      "description": "会话时长、完成度归档。PHYSICAL 类由此判定有效训练（D48：完成组数 ≥60% × 应练组数；组数不可判定时按 ≥60% 课程时长兜底）→ A4。",
       "allOf": [{ "$ref": "#/$defs/envelope" }],
       "properties": {
         "event_type": { "const": "session_end" },

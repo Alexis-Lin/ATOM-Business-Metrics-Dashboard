@@ -9,7 +9,7 @@
       "a3": "应用活跃：任一 App 会话（任意 app_category）",
       "a4": "训练活跃：≥1 次有效训练（仅 PHYSICAL 类）"
     },
-    "qualified_workout": "PHYSICAL 类会话中 完成 ≥1 完整组 OR duration_sec ≥ 60",
+    "qualified_workout": "PHYSICAL 类会话中 完成组数 ≥ 60% × 应练组数（planned_set_cnt）；组数不可判定时按 实际时长 ≥ 60% × 课程时长 兜底（D48，取代旧 ≥1 组或 ≥60s 低门槛）",
     "workout_length_type": { "mini": "短练 <5min", "short": "小课 5–15min（含两端）", "long": "长课 >15min" },
     "app_category": ["PHYSICAL", "DESK", "AMBIENT"],
     "ratio_suffix": "R = 绝对值 ÷ ACT02（同时点已激活账号）",
@@ -56,7 +56,7 @@
     {"id":"RET07","name":"首周交互对照","module":"RET","unit":"%","dedup":"ratio","layer":"L3","phase":"P1","formula":"首周任意 App 会话>=2 的占比（与 RET06 对照）"},
     {"id":"TRN01","name":"Session Starts","module":"TRN","unit":"次","dedup":"pv","layer":"L2","phase":"P1"},
     {"id":"TRN03","name":"完成率","module":"TRN","unit":"%","dedup":"ratio","layer":"L3","phase":"P1","formula":"完成次(completion_pct>=0.70 占位,R20)/开始次，按 workout_length_type × 单课"},
-    {"id":"TRN06","name":"首次训练耗时（TTFW）","module":"TRN","unit":"天","dedup":"user_uv","layer":"L3","phase":"P1","formula":"median/P90(首次有效训练 − 首绑)"},
+    {"id":"TRN06","name":"激活到首练间隔（TTFW）","module":"TRN","unit":"天","dedup":"user_uv","layer":"L3","phase":"P1","formula":"median/P90(首次有效训练 − 首绑)"},
     {"id":"TRN08","name":"时长课型占比","module":"TRN","unit":"课次占比","dedup":"pv","layer":"L3","phase":"P1","formula":"workout_length_type(mini/short/long) 课次结构；意图维度，与实际时长正交"},
     {"id":"TRN09","name":"深度训练占比","module":"TRN","unit":"%","dedup":"ratio","layer":"L3","phase":"P1","formula":"(sets>=2 OR course_completed)/qualified_workouts","note":"D41 修订：原 >=2组且>=5min 与短练课型冲突；course_completed = 完整完成一节课（任意时长课型）"},
     {"id":"TRN10","name":"组完成率","module":"TRN","unit":"%","dedup":"ratio","layer":"L3","phase":"P1","formula":"TRN22 完成组数 / TRN21 训练组数（应练）","note":"与 TRN03（课次口径）分开：一个看组一个看课"},
