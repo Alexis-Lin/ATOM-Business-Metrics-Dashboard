@@ -1,0 +1,591 @@
+<title>Atom 业绩看板</title>
+<style>
+:root{
+  --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --intl:#2a78d6; --cn:#eb6834;
+  --l1:#86b6ef; --l2:#3987e5; --l3:#184f95;
+  --plus:#1baf7a; --progift:#86b6ef; --propaid:#2a78d6;
+  --seq1:#cde2fb; --seq2:#9ec5f4; --seq3:#6da7ec; --seq4:#3987e5; --seq5:#256abf; --seq6:#184f95; --seq7:#0d366b;
+  --good:#0ca30c; --goodtext:#006300; --warn:#fab219; --crit:#d03b3b;
+  --accent:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+    --intl:#3987e5; --cn:#d95926;
+    --l1:#86b6ef; --l2:#5598e7; --l3:#1c5cab;
+    --plus:#199e70; --progift:#86b6ef; --propaid:#3987e5;
+    --good:#0ca30c; --goodtext:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+    --accent:#3987e5;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+  --intl:#3987e5; --cn:#d95926;
+  --l1:#86b6ef; --l2:#5598e7; --l3:#1c5cab;
+  --plus:#199e70; --progift:#86b6ef; --propaid:#3987e5;
+  --good:#0ca30c; --goodtext:#0ca30c; --warn:#fab219; --crit:#d03b3b;
+  --accent:#3987e5;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--page); color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:14px; line-height:1.55;}
+.top{position:sticky; top:0; z-index:20; background:var(--page); border-bottom:1px solid var(--grid); padding:0 20px;}
+.top-row{max-width:1240px; margin:0 auto; display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:12px 0 8px;}
+.brand{font-size:16px; font-weight:700; letter-spacing:.01em;}
+.brand small{font-weight:400; color:var(--muted); margin-left:8px; font-size:12px;}
+.fresh{font-size:12px; color:var(--muted); margin-left:auto;}
+.fresh .dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--warn); margin-right:5px; vertical-align:1px;}
+.seg{display:inline-flex; border:1px solid var(--grid); border-radius:8px; overflow:hidden;}
+.seg button{border:0; background:transparent; color:var(--ink2); padding:5px 14px; font-size:13px; cursor:pointer;}
+.seg button.on{background:var(--accent); color:#fff; font-weight:600;}
+.seg button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+.tabs{max-width:1240px; margin:0 auto; display:flex; gap:2px; overflow-x:auto;}
+.tabs button{border:0; background:transparent; color:var(--ink2); padding:9px 14px; font-size:13.5px;
+  cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;}
+.tabs button.on{color:var(--ink); font-weight:700; border-bottom-color:var(--accent);}
+.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+main{max-width:1240px; margin:0 auto; padding:18px 20px 72px;}
+.grid{display:grid; gap:14px;}
+.g4{grid-template-columns:repeat(4,1fr);} .g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.g4,.g3,.g2{grid-template-columns:1fr}}
+.card{background:var(--surface); border:1px solid var(--ring); border-radius:10px; padding:14px 16px; min-width:0;}
+.card h3{margin:0 0 2px; font-size:13px; font-weight:600; color:var(--ink2);}
+.card .sub{font-size:11.5px; color:var(--muted); margin:0 0 8px;}
+.kpi .val{font-size:26px; font-weight:600; margin:2px 0 0;}
+.kpi .delta{font-size:12px; margin-left:8px; font-weight:500;}
+.kpi .delta.up{color:var(--goodtext);} .kpi .delta.down{color:var(--crit);}
+.kpi svg{display:block; margin-top:6px;}
+.sec{margin:26px 0 10px; font-size:15px; font-weight:700;}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink2); margin:4px 0 2px;}
+.legend .it{display:inline-flex; align-items:center; gap:6px;}
+.legend .sw{width:10px; height:10px; border-radius:3px; display:inline-block;}
+.legend .ln{width:14px; height:2px; border-radius:1px; display:inline-block;}
+figure{margin:0;} figcaption{font-size:11.5px; color:var(--muted); margin-top:6px;}
+svg text{font-family:inherit;}
+.tt{position:fixed; z-index:50; pointer-events:none; background:var(--surface); color:var(--ink);
+  border:1px solid var(--ring); box-shadow:0 4px 14px rgba(0,0,0,.12); border-radius:8px;
+  padding:8px 10px; font-size:12px; display:none; max-width:260px;}
+.tt b{font-weight:600;} .tt .row{display:flex; align-items:center; gap:6px; margin-top:2px;}
+.tt .sw{width:8px; height:8px; border-radius:2px;}
+.tt .v{margin-left:auto; font-variant-numeric:tabular-nums; padding-left:12px;}
+table.dt{border-collapse:collapse; width:100%; font-size:12.5px;}
+.dt th{color:var(--ink2); font-weight:600; text-align:left; padding:6px 8px; border-bottom:1px solid var(--grid); white-space:nowrap;}
+.dt td{padding:6px 8px; border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums;}
+.dt td:first-child{font-variant-numeric:normal;}
+.pill{display:inline-block; font-size:11px; padding:1px 8px; border-radius:99px; font-weight:600;}
+.pill.good{background:color-mix(in srgb,var(--good) 14%,transparent); color:var(--goodtext);}
+.pill.warn{background:color-mix(in srgb,var(--warn) 18%,transparent); color:var(--ink);}
+.pill.crit{background:color-mix(in srgb,var(--crit) 14%,transparent); color:var(--crit);}
+.alert{display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-bottom:1px solid var(--grid); font-size:13px;}
+.alert:last-child{border-bottom:0;}
+.alert .ic{font-size:14px; line-height:1.4;}
+.funnel{display:flex; gap:0; align-items:stretch; overflow-x:auto; padding:4px 0;}
+.fstage{flex:1; min-width:118px; padding:10px 12px; border:1px solid var(--grid); border-left:0; position:relative;}
+.fstage:first-child{border-left:1px solid var(--grid); border-radius:8px 0 0 8px;}
+.fstage:last-child{border-radius:0 8px 8px 0;}
+.fstage .n{font-size:12px; color:var(--ink2);}
+.fstage .v{font-size:19px; font-weight:600; margin:2px 0;}
+.fstage .r{font-size:11.5px; color:var(--muted);}
+.fstage .bar{height:5px; border-radius:3px; background:var(--seq2); margin-top:6px; overflow:hidden;}
+.fstage .bar i{display:block; height:100%; background:var(--accent); border-radius:3px;}
+.note{font-size:12px; color:var(--muted);}
+footer{max-width:1240px; margin:30px auto 0; padding:14px 20px; color:var(--muted); font-size:12px; border-top:1px solid var(--grid);}
+.hide{display:none !important;}
+a{color:var(--accent);}
+</style>
+
+<div class="top">
+  <div class="top-row">
+    <span class="brand">Atom 业绩看板<small>原型 · 模拟数据</small></span>
+    <span class="seg" id="plSeg" role="group" aria-label="产品线筛选">
+      <button data-pl="all" class="on">全部</button><button data-pl="intl">国际版</button><button data-pl="cn">中国版</button>
+    </span>
+    <span class="fresh"><span class="dot"></span>数据截至 2026-08-17（PT）｜开机活跃近 7 日未定稿</span>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-t="ov" class="on">总览</button><button data-t="act">激活</button>
+    <button data-t="eng">活跃</button><button data-t="ret">留存</button>
+    <button data-t="wk">训练</button><button data-t="mem">会员</button><button data-t="dev">设备健康</button>
+  </nav>
+</div>
+<main id="main"></main>
+<footer>Atom 业绩看板原型 v1 ｜ 全部数据为演示用模拟数据（2026-04 → 2026-08）｜ 口径：<i>atom-data-dictionary.md v1.0</i> ｜ 图内编号（B06、E05…）对应指标字典条目。颜色约定：国际版=蓝 · 中国版=橙 · 活跃层级=蓝色由浅至深 · Pro 付费/赠送=同蓝两档 · Plus=青绿。</footer>
+<div class="tt" id="tt"></div>
+
+<script>
+'use strict';
+/* ---------- seeded mock data ---------- */
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;}}
+const WK=[];{ // ISO weeks W14(2026-03-30) .. W33(2026-08-10)
+  const d=new Date(Date.UTC(2026,2,30));
+  for(let i=14;i<=33;i++){WK.push({label:'W'+i,date:new Date(d)});d.setUTCDate(d.getUTCDate()+7);}
+}
+const NW=WK.length;
+function series(seed,base,growth,noise){const r=rng(seed);return WK.map((_,i)=>Math.round(base*Math.pow(1+growth,i)*(1+(r()-.5)*noise)));}
+const D={
+  intl:{newAct:series(11,420,.085,.22)},
+  cn:  {newAct:series(21,260,.075,.28)},
+};
+for(const k of ['intl','cn']){
+  const d=D[k], r=rng(k==='intl'?31:41);
+  d.cum=[]; let c=(k==='intl'?2600:1700);
+  d.newAct.forEach(v=>{c+=v; d.cum.push(c);});
+  d.wau1=d.cum.map((c,i)=>Math.round(c*(0.60-0.006*i)*(1+(r()-.5)*.06)));   // power-on WAU share slowly declining
+  d.wau2=d.wau1.map(v=>Math.round(v*(0.90+(r()-.5)*.03)));
+  d.wau3=d.wau2.map(v=>Math.round(v*(0.56+(r()-.5)*.05)));
+  d.plus=d.cum.map(c=>Math.round(c*0.93));
+  d.proGift=d.cum.map((c,i)=>Math.round(d.newAct.slice(Math.max(0,i-12),i+1).reduce((a,b)=>a+b,0)*0.78));
+  d.proPaid=[]; let p=(k==='intl'?260:120);
+  d.newAct.forEach((v,i)=>{p+=Math.round(v*0.055+ (i>6? d.proGift[i]*0.012:0)); p=Math.round(p*0.995); d.proPaid.push(p);});
+  d.sess=d.wau3.map(v=>({W:Math.round(v*1.1),M:Math.round(v*1.6),m:Math.round(v*2.1)}));
+}
+const SUM=a=>a.reduce((x,y)=>x+y,0);
+function pick(pl){ // returns metric accessor combining regions
+  const g=(f)=>WK.map((_,i)=> pl==='all'? f(D.intl)[i]+f(D.cn)[i] : f(D[pl])[i]);
+  return {newAct:g(d=>d.newAct),cum:g(d=>d.cum),wau1:g(d=>d.wau1),wau2:g(d=>d.wau2),wau3:g(d=>d.wau3),
+    plus:g(d=>d.plus),proGift:g(d=>d.proGift),proPaid:g(d=>d.proPaid),
+    sessW:g(d=>d.sess.map(s=>s.W)),sessM:g(d=>d.sess.map(s=>s.M)),sessm:g(d=>d.sess.map(s=>s.m))};
+}
+// weekly cohort retention (L3), 12 cohorts x W0..W8
+const COH=[];{const r=rng(77);
+  for(let c=0;c<12;c++){const row=[];const base=0.62+c*0.008;
+    for(let w=0;w<=8;w++){ if(c+w>=12+2) {row.push(null);continue;}
+      let v=w===0?base: base*Math.pow(0.80,Math.min(w,3))*Math.pow(0.965,Math.max(0,w-3));
+      row.push(Math.max(.14,v*(1+(r()-.5)*.08)));}
+    COH.push({label:'W'+(22+c),n:Math.round(500+r()*700),row});}
+}
+const COHM=[];{const r=rng(88);const ms=['4 月','5 月','6 月','7 月','8 月'];
+  for(let c=0;c<5;c++){const row=[];const base=0.60+c*0.012;
+    for(let m=0;m<=4;m++){ if(c+m>4){row.push(null);continue;}
+      let v=m===0?base:base*Math.pow(0.62,Math.min(m,1))*Math.pow(0.90,Math.max(0,m-1));
+      row.push(Math.max(.12,v*(1+(r()-.5)*.06)));}
+    COHM.push({label:ms[c],n:Math.round(2200+c*700+r()*400),row});}
+}
+const QR = WK.map((_,i)=>Math.max(.9,1.55-0.021*i+ (rng(55+i)()-.5)*.1));
+const FREQ={labels:['0','1','2','3','4','5+'],vals:[38,22,16,11,7,6]};
+const GIFT={labels:['赠 1 个月','赠 3 个月','赠 6 个月','赠 12 个月'],conv:[12,22,31,38],n:[1840,2620,1310,540]};
+const AIH={labels:['0–20%','20–40%','40–60%','60–80%','80–99%','触顶'],plus:[41,23,14,9,7,6],pro:[18,20,22,18,13,9]};
+const SEG={labels:WK.slice(8).map(w=>w.label),
+  power:[9,9,10,10,10,11,11,11,12,12,12,12],regular:[24,24,25,25,26,26,26,27,27,27,26,26],
+  light:[27,27,27,26,26,26,25,25,25,24,24,24],dormant:[22,22,21,21,21,20,21,21,20,21,21,22],
+  churn:[18,18,17,18,17,17,17,16,16,16,17,16]};
+const FW={labels:['v2.4.0','v2.4.1','v2.5.0','v2.5.1(新)'],vals:[6,14,31,49]};
+const DELAY={labels:['<1 分','1–60 分','1–24 时','1–3 天','3–7 天','>7 天(丢弃)'],vals:[61,17,12,6,3,1]};
+
+/* ---------- tiny chart lib ---------- */
+const NS='http://www.w3.org/2000/svg';
+const fmt=n=>n>=10000?(n/1000).toFixed(1)+'K':(''+Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const pct=v=>Math.round(v*100)+'%';
+const tt=document.getElementById('tt');
+function showTT(html,x,y){tt.innerHTML=html;tt.style.display='block';
+  const w=tt.offsetWidth,h=tt.offsetHeight;
+  tt.style.left=Math.min(x+14,innerWidth-w-8)+'px';
+  tt.style.top=Math.max(8,Math.min(y-h-10,innerHeight-h-8))+'px';}
+function hideTT(){tt.style.display='none';}
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);
+  for(const k in attrs)e.setAttribute(k,attrs[k]); if(parent)parent.appendChild(e); return e;}
+function cvar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+function lineChart(host,{labels,series,h=190,yFmt=fmt,fill=false,ymax=null}){
+  host.innerHTML='';const W=host.clientWidth||560,H=h,pl=44,pr=10,pt=10,pb=22;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H,role:'img'},host);
+  const all=series.flatMap(s=>s.data).filter(v=>v!=null);
+  const mx=ymax||Math.max(...all)*1.08, mn=0;
+  const x=i=>pl+(W-pl-pr)*i/(labels.length-1), y=v=>pt+(H-pt-pb)*(1-(v-mn)/(mx-mn));
+  for(let g=0;g<=3;g++){const gy=pt+(H-pt-pb)*g/3;
+    el('line',{x1:pl,x2:W-pr,y1:gy,y2:gy,stroke:cvar('--grid'),'stroke-width':1},svg);
+    el('text',{x:pl-6,y:gy+4,'text-anchor':'end','font-size':10,fill:cvar('--muted')},svg)
+      .textContent=yFmt(mx-(mx-mn)*g/3);}
+  const step=Math.ceil(labels.length/8);
+  labels.forEach((l,i)=>{if(i%step===0||i===labels.length-1)
+    el('text',{x:x(i),y:H-6,'text-anchor':'middle','font-size':10,fill:cvar('--muted')},svg).textContent=l;});
+  series.forEach(s=>{
+    const col=cvar(s.color);
+    const pts=s.data.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+    if(fill){const dA='M'+pts.map(p=>p.join(',')).join('L')+`L${pts[pts.length-1][0]},${H-pb}L${pts[0][0]},${H-pb}Z`;
+      el('path',{d:dA,fill:col,opacity:.10},svg);}
+    el('path',{d:'M'+pts.map(p=>p.join(',')).join('L'),fill:'none',stroke:col,
+      'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+    const lp=pts[pts.length-1];
+    el('circle',{cx:lp[0],cy:lp[1],r:4,fill:col,stroke:cvar('--surface'),'stroke-width':2},svg);
+  });
+  const cross=el('line',{x1:0,x2:0,y1:pt,y2:H-pb,stroke:cvar('--axis'),'stroke-width':1,opacity:0},svg);
+  const cap=el('rect',{x:pl,y:pt,width:W-pl-pr,height:H-pt-pb,fill:'transparent'},svg);
+  cap.addEventListener('mousemove',ev=>{
+    const r=host.getBoundingClientRect(),sx=W/r.width;
+    const i=Math.max(0,Math.min(labels.length-1,Math.round(((ev.clientX-r.left)*sx-pl)/((W-pl-pr)/(labels.length-1)))));
+    cross.setAttribute('x1',x(i));cross.setAttribute('x2',x(i));cross.setAttribute('opacity',.7);
+    showTT(`<b>${labels[i]}</b>`+series.map(s=>`<div class="row"><span class="sw" style="background:${cvar(s.color)}"></span>${s.name}<span class="v">${s.data[i]==null?'—':yFmt(s.data[i])}</span></div>`).join(''),ev.clientX,ev.clientY);
+  });
+  cap.addEventListener('mouseleave',()=>{cross.setAttribute('opacity',0);hideTT();});
+}
+function stackChart(host,{labels,series,h=190,asPct=false,yFmt=fmt}){
+  host.innerHTML='';const W=host.clientWidth||560,H=h,pl=44,pr=10,pt=10,pb=22;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H,role:'img'},host);
+  const totals=labels.map((_,i)=>SUM(series.map(s=>s.data[i])));
+  const mx=asPct?100:Math.max(...totals)*1.08;
+  const bw=Math.min(24,(W-pl-pr)/labels.length-3);
+  const x=i=>pl+(W-pl-pr)*(i+.5)/labels.length, y=v=>pt+(H-pt-pb)*(1-v/mx);
+  for(let g=0;g<=3;g++){const gy=pt+(H-pt-pb)*g/3;
+    el('line',{x1:pl,x2:W-pr,y1:gy,y2:gy,stroke:cvar('--grid'),'stroke-width':1},svg);
+    el('text',{x:pl-6,y:gy+4,'text-anchor':'end','font-size':10,fill:cvar('--muted')},svg)
+      .textContent=(asPct?Math.round(mx-mx*g/3)+'%':yFmt(mx-mx*g/3));}
+  const step=Math.ceil(labels.length/10);
+  labels.forEach((l,i)=>{if(i%step===0||i===labels.length-1)
+    el('text',{x:x(i),y:H-6,'text-anchor':'middle','font-size':10,fill:cvar('--muted')},svg).textContent=l;});
+  labels.forEach((l,i)=>{
+    let acc=0;
+    series.forEach((s,si)=>{
+      const raw=s.data[i], v=asPct? raw/totals[i]*100 : raw;
+      const y1=y(acc+v), hh=Math.max(0,y(acc)-y(acc+v)-(si<series.length-1?2:0));
+      const rc=el('rect',{x:x(i)-bw/2,y:y1,width:bw,height:Math.max(hh,0),fill:cvar(s.color),rx:si===series.length-1?4:0},svg);
+      rc.addEventListener('mousemove',ev=>showTT(`<b>${l} · ${s.name}</b><div class="row"><span class="v">${asPct?Math.round(raw/totals[i]*100)+'%':yFmt(raw)}</span></div>`,ev.clientX,ev.clientY));
+      rc.addEventListener('mouseleave',hideTT);
+      acc+=v;});
+  });
+}
+function barH(host,{labels,vals,color='--accent',suffix='%',max=null,h=null,note=null}){
+  host.innerHTML='';const W=host.clientWidth||560,rowH=30,H=h||labels.length*rowH+8;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H,role:'img'},host);
+  const lw=Math.min(120,W*.28), mx=max||Math.max(...vals)*1.15;
+  labels.forEach((l,i)=>{const yy=i*rowH+8;
+    el('text',{x:lw-8,y:yy+13,'text-anchor':'end','font-size':11.5,fill:cvar('--ink2')},svg).textContent=l;
+    el('rect',{x:lw,y:yy,width:(W-lw-56)*Math.min(1,vals[i]/mx),height:18,rx:4,fill:cvar(color)},svg);
+    el('text',{x:lw+(W-lw-56)*Math.min(1,vals[i]/mx)+8,y:yy+13,'font-size':11.5,fill:cvar('--ink')},svg)
+      .textContent=vals[i]+suffix+(note?` · ${note[i]}`:'');});
+}
+function heatmap(host,{rows,cols,title}){
+  host.innerHTML='';const W=host.clientWidth||560;
+  const lw=64,cw=Math.min(56,(W-lw-40)/cols.length),ch=26;
+  const H=(rows.length+1)*ch+14;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H,role:'img'},host);
+  const ramp=['--seq1','--seq2','--seq3','--seq4','--seq5','--seq6','--seq7'];
+  cols.forEach((c,j)=>el('text',{x:lw+cw*j+cw/2,y:14,'text-anchor':'middle','font-size':10.5,fill:cvar('--muted')},svg).textContent=c);
+  rows.forEach((r,i)=>{
+    const yy=(i+1)*ch+4;
+    el('text',{x:lw-8,y:yy+ch/2+4,'text-anchor':'end','font-size':11,fill:cvar('--ink2')},svg).textContent=r.label;
+    r.row.forEach((v,j)=>{
+      if(v==null)return;
+      const small=r.n<100;
+      const idx=Math.min(ramp.length-1,Math.floor(v*ramp.length));
+      const rc=el('rect',{x:lw+cw*j+1,y:yy+1,width:cw-2,height:ch-2,rx:3,
+        fill:small?cvar('--grid'):cvar(ramp[idx]),opacity:small?.6:1},svg);
+      const dark=idx>=3&&!small;
+      if(cw>=40)el('text',{x:lw+cw*j+cw/2,y:yy+ch/2+4,'text-anchor':'middle','font-size':10,
+        fill:small?cvar('--muted'):(dark?'#fff':cvar('--ink')),'pointer-events':'none'},svg).textContent=Math.round(v*100);
+      rc.addEventListener('mousemove',ev=>showTT(`<b>cohort ${r.label} · ${cols[j]}</b><div class="row">L3 运动留存<span class="v">${Math.round(v*100)}%</span></div><div class="row">样本<span class="v">${fmt(r.n)}${small?'（<100 灰显）':''}</span></div>`,ev.clientX,ev.clientY));
+      rc.addEventListener('mouseleave',hideTT);
+    });
+  });
+}
+function spark(host,data,color){
+  const W=120,H=30;host.innerHTML='';
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,'aria-hidden':'true'},host);
+  const mx=Math.max(...data),mn=Math.min(...data);
+  const x=i=>2+(W-4)*i/(data.length-1), y=v=>3+(H-8)*(1-(v-mn)/((mx-mn)||1));
+  el('path',{d:'M'+data.map((v,i)=>`${x(i)},${y(v)}`).join('L'),fill:'none',
+    stroke:cvar(color||'--accent'),'stroke-width':1.6,'stroke-linecap':'round'},svg);
+  el('circle',{cx:x(data.length-1),cy:y(data[data.length-1]),r:3,fill:cvar(color||'--accent'),
+    stroke:cvar('--surface'),'stroke-width':1.5},svg);
+}
+
+/* ---------- page assembly ---------- */
+let PL='all', TAB='ov';
+const main=document.getElementById('main');
+const L=(items)=>'<div class="legend">'+items.map(i=>`<span class="it"><span class="${i.line?'ln':'sw'}" style="background:${cvar(i.c)}"></span>${i.n}</span>`).join('')+'</div>';
+function kpi(id,label,sub){return `<div class="card kpi"><h3>${label}</h3><p class="sub">${sub||''}</p><div class="val" id="${id}v"></div><div id="${id}s"></div></div>`;}
+function setKpi(id,val,delta,sparkData,color){
+  document.getElementById(id+'v').innerHTML=val+(delta!=null?`<span class="delta ${delta>=0?'up':'down'}">${delta>=0?'▲':'▼'} ${Math.abs(delta).toFixed(1)}%</span>`:'');
+  if(sparkData)spark(document.getElementById(id+'s'),sparkData,color);
+}
+const last=a=>a[a.length-1], prev=a=>a[a.length-2];
+const wow=a=>(last(a)-prev(a))/prev(a)*100;
+
+function render(){
+  const M=pick(PL);
+  const sections={
+ov:`
+<div class="card"><h3>业务主漏斗 · 本季累计（口径：字典 §0.3）</h3><div class="funnel" id="funnel"></div></div>
+<div class="grid g4" style="margin-top:14px">
+ ${kpi('k1','累计配对激活设备','A01 · gross')}
+ ${kpi('k2','本周新增激活','A02')}
+ ${kpi('k3','WAU-Workout ★','B06 · NSM-1')}
+ ${kpi('k4','运动转化率 L3/L1','B10')}
+ ${kpi('k5','活跃付费 Pro ★','E02 · NSM-2 · 不含赠送')}
+ ${kpi('k6','赠转付转化率','E05 · 滚动 30 天')}
+ ${kpi('k7','W4 运动留存','C01 · 最新可计算周 cohort')}
+ ${kpi('k8','Quick Ratio','C04 · 活跃盘')}
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>三层活跃 WAU 趋势</h3>${L([{n:'L1 开机',c:'--l1',line:1},{n:'L2 联网',c:'--l2',line:1},{n:'L3 运动',c:'--l3',line:1}])}<figure><div id="c_wau"></div></figure></div>
+ <div class="card"><h3>会员结构（周末快照）</h3>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem"></div><figcaption>Plus 随设备终身免费；会员生意的看点在 Pro 两档。</figcaption></figure></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>Quick Ratio（周）</h3><p class="sub">(New+Resurrected)/Churned；&lt;1 = 流失大于新增</p><figure><div id="c_qr"></div></figure></div>
+ <div class="card"><h3>需要关注</h3><div id="alerts"></div></div>
+</div>`,
+act:`
+<div class="grid g4">
+ ${kpi('a1','累计配对激活设备','A01 · gross（净值月度修正）')}
+ ${kpi('a2','本周新增激活','A02')}
+ ${kpi('a3','激活率','A05 · 激活/售出')}
+ ${kpi('a4','注册→绑定转化(7日)','A09')}
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>每周新增激活（按产品线）</h3>${L([{n:'国际版',c:'--intl'},{n:'中国版',c:'--cn'}])}<figure><div id="c_na"></div></figure></div>
+ <div class="card"><h3>累计激活曲线</h3>${L([{n:'国际版',c:'--intl',line:1},{n:'中国版',c:'--cn',line:1}])}<figure><div id="c_cum"></div></figure></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>已售未激活存量池（账龄）</h3><p class="sub">A08 · 已花 CAC 零价值，召回目标</p><figure><div id="c_backlog"></div></figure></div>
+ <div class="card"><h3>激活健康</h3><table class="dt">
+  <tr><th>指标</th><th>值</th><th>周环比</th></tr>
+  <tr><td>激活时延中位数（A06）</td><td>2.4 天</td><td><span class="pill good">−0.2 天</span></td></tr>
+  <tr><td>激活时延 P90</td><td>16 天</td><td><span class="pill warn">+1 天</span></td></tr>
+  <tr><td>首次绑定成功率（A07）</td><td>93.1%</td><td><span class="pill good">+0.4pp</span></td></tr>
+  <tr><td>户均设备数（A10）</td><td>1.08</td><td>—</td></tr>
+  <tr><td>多机账号占比</td><td>5.6%</td><td>—</td></tr>
+  <tr><td>App 注册→绑定差值池</td><td>4,120 账号</td><td class="note">买前研究 61% / 绑定失败 39%</td></tr>
+ </table><p class="note" style="margin-top:8px">退货数据为销售端手动月度导入（manual），当前展示 gross 口径。</p></div>
+</div>`,
+eng:`
+<div class="card"><h3>3 × 3 活跃矩阵（B01–B09，账号去重，PT 日界）</h3><div id="mtx"></div></div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>三层活跃 WAU</h3>${L([{n:'L1 开机',c:'--l1',line:1},{n:'L2 联网',c:'--l2',line:1},{n:'L3 运动',c:'--l3',line:1}])}<figure><div id="c_wau2"></div><figcaption>L3/L1 = 运动转化率（开机却没练 = 被劝退）；L2/L1 = 联网健康率。</figcaption></figure></div>
+ <div class="card"><h3>周训练频次分布（B12）</h3><p class="sub">活跃账号的周有效训练次数 · 本周</p><figure><div id="c_freq"></div><figcaption>均值 2.1 次/周——但分布显示 38% 的周活跃账号本周 0 训练。</figcaption></figure></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>用户分层占比（B14 · 近 28 天）</h3>${L([{n:'Power ≥12 次',c:'--seq6'},{n:'Regular 4–11',c:'--seq4'},{n:'Light 1–3',c:'--seq2'},{n:'Dormant',c:'--seq1'},{n:'Churned',c:'--grid'}])}<figure><div id="c_seg"></div><figcaption>Power 层占比是产品成功的最硬指标，也是 Pro 的天然候选池。</figcaption></figure></div>
+ <div class="card"><h3>活跃健康</h3><table class="dt">
+  <tr><th>指标</th><th>本周</th><th>上周</th></tr>
+  <tr><td>运动转化率 L3/L1（B10）</td><td id="m_b10"></td><td class="note">—</td></tr>
+  <tr><td>联网健康率 L2/L1（B11）</td><td id="m_b11"></td><td class="note">—</td></tr>
+  <tr><td>周均有效训练次数（B13）</td><td>2.1</td><td>2.0</td></tr>
+  <tr><td>WAU / MAU</td><td>61%</td><td>60%</td></tr>
+  <tr><td>静默账号（B15 · 28 天无 L1）</td><td>18,940</td><td class="note">可召回资产池</td></tr>
+ </table></div>
+</div>`,
+ret:`
+<div class="grid g2">
+ <div class="card"><h3>周 Cohort · L3 运动留存（C01）</h3><p class="sub">行 = 激活 ISO 周 · 列 = 激活后第 n 周 · 数字 = %。样本 &lt;100 灰显。</p><figure><div id="c_coh"></div><figcaption>周 cohort × 固件版本是 OTA 效果评估的核心视图（原型未挂固件维度）。</figcaption></figure></div>
+ <div class="card"><h3>月 Cohort · L3 运动留存（C02）</h3><p class="sub">2026-04 起 · 数字 = %</p><figure><div id="c_cohm"></div></figure>
+ <h3 style="margin-top:16px">Aha 前导（C06）</h3><table class="dt">
+  <tr><th>首周训练次数</th><th>占比</th><th>W12 留存</th></tr>
+  <tr><td>0 次</td><td>31%</td><td>9%</td></tr>
+  <tr><td>1–2 次</td><td>41%</td><td>21%</td></tr>
+  <tr><td>≥3 次</td><td>28%</td><td><b>54%</b></td></tr>
+ </table><p class="note" style="margin-top:6px">首周 ≥3 次的账号 W12 留存是 1–2 次组的 2.6 倍 → 下一季目标：把 28% 提上去。</p></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>Quick Ratio（C04 · 周）</h3><figure><div id="c_qr2"></div><figcaption>逼近 1 而总量在涨 = 增长全靠新销量填流失坑。</figcaption></figure></div>
+ <div class="card"><h3>Growth Accounting（本周）</h3><table class="dt">
+  <tr><th>分量</th><th>账号数</th></tr>
+  <tr><td>New（新激活且活跃）</td><td>+3,480</td></tr>
+  <tr><td>Resurrected（复活，C05）</td><td>+920</td></tr>
+  <tr><td>Churned（转沉默）</td><td>−3,860</td></tr>
+  <tr><td><b>净增</b></td><td><b>+540</b></td></tr>
+  <tr><td>复活后 4 周留存</td><td>44%</td></tr>
+ </table></div>
+</div>`,
+wk:`
+<div class="grid g4">
+ ${kpi('w1','本周有效训练次数','≥1 完整组 或 ≥1 分钟')}
+ ${kpi('w2','深度训练占比 ★','D09 · ≥2 组且≥5 分钟')}
+ ${kpi('w3','Time to First Workout','D06 · 中位数')}
+ ${kpi('w4','自填负荷覆盖率','D16 · volume 的数据前提')}
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>课型结构 · 每周课次（D08 Mix）</h3>${L([{n:'大课 20–30 min',c:'--seq6'},{n:'短课 5–10 min',c:'--seq4'},{n:'微课 1–2 min',c:'--seq2'}])}<figure><div id="c_mix"></div><figcaption>三类分开统计不加总；观察微课→大课进阶 or 大课→微课退坡。</figcaption></figure></div>
+ <div class="card"><h3>完成率（D03 · 按课型）</h3><figure><div id="c_comp"></div></figure>
+ <table class="dt" style="margin-top:10px">
+  <tr><th>质量指标</th><th>值</th></tr>
+  <tr><td>组完成率（D10）</td><td>84%（低 = 太难在劝退）</td></tr>
+  <tr><td>首课完成率（D07）</td><td>71%</td></tr>
+  <tr><td>AI 动作打分均值（D18）</td><td>7.8 / 10</td></tr>
+  <tr><td>Streak ≥8 周账号（D13）</td><td>3,120（几乎不流失）</td></tr>
+ </table></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>课程内容 Top / Bottom（D14/D15）</h3>
+<table class="dt"><tr><th>课程</th><th>课型</th><th>开始数</th><th>完成率</th><th>复练率</th></tr>
+<tr><td>全身燃脂 HIIT 25'</td><td>大课</td><td>12,480</td><td>72%</td><td>34%</td></tr>
+<tr><td>核心激活 8'</td><td>短课</td><td>10,920</td><td>81%</td><td>41%</td></tr>
+<tr><td>跳绳间歇 2'</td><td>微课</td><td>18,340</td><td>93%</td><td>57%</td></tr>
+<tr><td>肩背矫正 22'</td><td>大课</td><td>3,140</td><td style="color:var(--crit)">48%</td><td>12%</td></tr></table>
+<p class="note" style="margin-top:8px">内容库消耗率（D14）：高消耗用户（&gt;70% 已练）达 6.8%——会员流失头号前置信号，需内容排期跟上。</p></div>`,
+mem:`
+<div class="grid g4">
+ ${kpi('m1','活跃付费 Pro ★','E02 · NSM-2')}
+ ${kpi('m2','Pro 在期渗透率','E03 ·（赠送+付费）/激活账号')}
+ ${kpi('m3','付费渗透率','E04')}
+ ${kpi('m4','cancel_pending 占比','E09 · 流失先行')}
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>会员结构趋势（E01）</h3>${L([{n:'Plus（免费）',c:'--plus'},{n:'Pro 赠送期',c:'--progift'},{n:'Pro 付费',c:'--propaid'}])}<figure><div id="c_mem2"></div></figure></div>
+ <div class="card"><h3>赠转付转化率 ★（E05 · 按赠送时长）</h3><p class="sub">赠送到期后 30 天内转自费的比例 · 括号为到期样本</p><figure><div id="c_gift"></div><figcaption>不同赠送时长天然是一组定价实验：12 个月赠送的转化是 1 个月的 3 倍——套装策略的直接依据。</figcaption></figure></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>AI 时长配额使用（E12/E13）</h3>${L([{n:'Plus',c:'--plus'},{n:'Pro',c:'--propaid'}])}<figure><div id="c_quota"></div><figcaption>Plus 触顶池（6%）= 最优质升级名单；Pro 低用量段 = 流失/降级高危。</figcaption></figure></div>
+ <div class="card"><h3>会员健康</h3><table class="dt">
+  <tr><th>指标</th><th>值</th><th></th></tr>
+  <tr><td>首次续费率（E07）</td><td>78%</td><td><span class="pill good">生死线之上</span></td></tr>
+  <tr><td>主动取消率 / 月（E08）</td><td>3.1%</td><td></td></tr>
+  <tr><td>支付失败率 / 月</td><td>1.9%</td><td class="note">催付挽回 46%</td></tr>
+  <tr><td>赢回率（E10）</td><td>7%</td><td></td></tr>
+  <tr><td>高频 Plus 池（E17）</td><td>5,840 账号</td><td class="note">周练 ≥2 次未付费 → 转化名单</td></tr>
+  <tr><td>低活跃付费池（E16）</td><td>1,210 账号</td><td><span class="pill crit">续费前干预</span></td></tr>
+  <tr><td>赠送期 WAU-L3（E18）</td><td>57%</td><td class="note">练起来的人才会转付费</td></tr>
+  <tr><td>高阶功能渗透（E15 · Pro）</td><td>63%</td><td class="note">不用权益的 Pro = 降级高危</td></tr>
+ </table></div>
+</div>`,
+dev:`
+<div class="grid g4">
+ ${kpi('d1','设备在线率','F01 · 当日联网/28 天活跃机')}
+ ${kpi('d2','配网成功率','F04')}
+ ${kpi('d3','OTA 7 日覆盖率','F03 · v2.5.1')}
+ ${kpi('d4','超窗丢弃事件','F06 · >7 天迟到')}
+</div>
+<div class="grid g2" style="margin-top:14px">
+ <div class="card"><h3>固件版本分布（F02）</h3><figure><div id="c_fw"></div><figcaption>与周 cohort 联动：新固件发布后观察对应 cohort 的 W1 留存是否异动。</figcaption></figure></div>
+ <div class="card"><h3>开机事件补传延迟分布（F05）</h3><p class="sub">7 天窗口内形态；&gt;7 天丢弃不入指标、留档监控</p><figure><div id="c_delay"></div></figure></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>数据完整性</h3><table class="dt">
+<tr><th>监控项</th><th>状态</th><th>说明</th></tr>
+<tr><td>set_completed 上报率</td><td><span class="pill good">99.2%</span></td><td>有效训练判定的第一依赖</td></tr>
+<tr><td>active_duration 可得率</td><td><span class="pill warn">暂无</span></td><td>R14：首期用会话时长，切换时打口径标注</td></tr>
+<tr><td>自填负荷覆盖率（D16）</td><td><span class="pill warn">38%</span></td><td>volume/强度进步仅覆盖此子集（自报口径）</td></tr>
+<tr><td>退货数据源</td><td><span class="pill warn">manual</span></td><td>销售端月度手动导入，滞后约 1 个月</td></tr>
+</table></div>`
+  };
+  main.innerHTML=sections[TAB];
+  fillCharts(M);
+}
+function fillCharts(M){
+  const wl=WK.map(w=>w.label);
+  if(TAB==='ov'){
+    const f=[['售出',52400,null],['配对激活',last(M.cum),'激活率 87%'],['首次有效训练',Math.round(last(M.cum)*.81),'81%'],
+      ['首周≥3次',Math.round(last(M.cum)*.81*.28),'28%'],['W4 留存',Math.round(last(M.cum)*.81*.28*.62),'—'],
+      ['Pro 付费',last(M.proPaid),'付费渗透 '+(last(M.proPaid)/last(M.cum)*100).toFixed(1)+'%']];
+    document.getElementById('funnel').innerHTML=f.map((s,i)=>
+      `<div class="fstage"><div class="n">${s[0]}</div><div class="v">${fmt(s[1])}</div><div class="r">${s[2]||'&nbsp;'}</div><div class="bar"><i style="width:${Math.round(s[1]/f[0][1]*100)}%"></i></div></div>`).join('');
+    setKpi('k1',fmt(last(M.cum)),wow(M.cum),M.cum,'--accent');
+    setKpi('k2',fmt(last(M.newAct)),wow(M.newAct),M.newAct,'--accent');
+    setKpi('k3',fmt(last(M.wau3)),wow(M.wau3),M.wau3,'--l3');
+    const b10=M.wau3.map((v,i)=>v/M.wau1[i]*100);
+    setKpi('k4',b10[NW-1].toFixed(0)+'%',b10[NW-1]-b10[NW-2],b10,'--accent');
+    setKpi('k5',fmt(last(M.proPaid)),wow(M.proPaid),M.proPaid,'--propaid');
+    setKpi('k6','26%',1.2,[21,22,22,23,24,23,24,25,25,26,26,26],'--accent');
+    setKpi('k7','58%',0.8,COH.slice(0,9).map(c=>c.row[4]*100),'--accent');
+    setKpi('k8',last(QR).toFixed(2),null,QR,'--accent');
+    lineChart(document.getElementById('c_wau'),{labels:wl,series:[
+      {name:'L1 开机',color:'--l1',data:M.wau1},{name:'L2 联网',color:'--l2',data:M.wau2},
+      {name:'L3 运动',color:'--l3',data:M.wau3}]});
+    stackChart(document.getElementById('c_mem'),{labels:wl,series:[
+      {name:'Plus',color:'--plus',data:M.plus},{name:'Pro 赠送',color:'--progift',data:M.proGift},
+      {name:'Pro 付费',color:'--propaid',data:M.proPaid}]});
+    lineChart(document.getElementById('c_qr'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QR.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
+    document.getElementById('alerts').innerHTML=[
+      ['⚠️','Quick Ratio 连续 6 周下行（1.42 → '+last(QR).toFixed(2)+'）——新增在填流失的坑，关注 Dormant 召回。','warn'],
+      ['⚠️','中国版 W'+ (33) +' 新增激活环比 −12%，渠道数据待核对。','warn'],
+      ['🔴','「肩背矫正 22\'」完成率 48%，显著低于大课均值 70%——建议内容组复盘。','crit'],
+      ['✅','固件 v2.5.1 发布后，对应周 cohort W1 留存 +2.1pp。','good']
+    ].map(a=>`<div class="alert"><span class="ic">${a[0]}</span><span>${a[1]}</span></div>`).join('');
+  }
+  if(TAB==='act'){
+    setKpi('a1',fmt(last(M.cum)),wow(M.cum),M.cum,'--accent');
+    setKpi('a2',fmt(last(M.newAct)),wow(M.newAct),M.newAct,'--accent');
+    setKpi('a3','87%',0.5,[82,83,84,84,85,85,86,86,86,87,87,87],'--accent');
+    setKpi('a4','78%',-0.6,[80,80,81,80,79,79,80,79,79,78,78,78],'--accent');
+    stackChart(document.getElementById('c_na'),{labels:wl,series:[
+      {name:'国际版',color:'--intl',data:PL==='cn'?WK.map(()=>0):D.intl.newAct},
+      {name:'中国版',color:'--cn',data:PL==='intl'?WK.map(()=>0):D.cn.newAct}]});
+    lineChart(document.getElementById('c_cum'),{labels:wl,series:[
+      ...(PL!=='cn'?[{name:'国际版',color:'--intl',data:D.intl.cum}]:[]),
+      ...(PL!=='intl'?[{name:'中国版',color:'--cn',data:D.cn.cum}]:[])],fill:true});
+    barH(document.getElementById('c_backlog'),{labels:['0–7 天','8–30 天','31–90 天','>90 天'],
+      vals:[2140,1730,1420,980],suffix:'',color:'--seq4',note:['正常窗口','提醒邮件','召回短信','疑似礼物/退货']});
+  }
+  if(TAB==='eng'){
+    const rows=[['L1 开机','--l1',M.wau1,1.28,.60],['L2 联网','--l2',M.wau2,1.27,.61],['L3 运动','--l3',M.wau3,1.42,.62]];
+    document.getElementById('mtx').innerHTML='<table class="dt"><tr><th></th><th>DAU（昨日）</th><th>WAU（滚 7 日）</th><th>MAU（滚 28 日）</th><th>WAU/MAU</th></tr>'+
+      rows.map(r=>`<tr><td><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${cvar(r[1])};margin-right:6px"></span>${r[0]}${r[0]==='L3 运动'?' <b style="color:var(--accent)">← NSM</b>':''}</td><td>${fmt(Math.round(last(r[2])/2.6))}</td><td>${fmt(last(r[2]))}</td><td>${fmt(Math.round(last(r[2])*r[3]))}</td><td>${pct(r[4])}</td></tr>`).join('')+'</table>';
+    lineChart(document.getElementById('c_wau2'),{labels:wl,series:[
+      {name:'L1',color:'--l1',data:M.wau1},{name:'L2',color:'--l2',data:M.wau2},{name:'L3',color:'--l3',data:M.wau3}]});
+    barH(document.getElementById('c_freq'),{labels:FREQ.labels.map(l=>l+' 次'),vals:FREQ.vals,color:'--seq4'});
+    stackChart(document.getElementById('c_seg'),{labels:SEG.labels,asPct:true,series:[
+      {name:'Power',color:'--seq6',data:SEG.power},{name:'Regular',color:'--seq4',data:SEG.regular},
+      {name:'Light',color:'--seq2',data:SEG.light},{name:'Dormant',color:'--seq1',data:SEG.dormant},
+      {name:'Churned',color:'--grid',data:SEG.churn}]});
+    document.getElementById('m_b10').textContent=Math.round(last(M.wau3)/last(M.wau1)*100)+'%';
+    document.getElementById('m_b11').textContent=Math.round(last(M.wau2)/last(M.wau1)*100)+'%';
+  }
+  if(TAB==='ret'){
+    heatmap(document.getElementById('c_coh'),{rows:COH,cols:['W0','W1','W2','W3','W4','W5','W6','W7','W8']});
+    heatmap(document.getElementById('c_cohm'),{rows:COHM,cols:['M0','M1','M2','M3','M4']});
+    lineChart(document.getElementById('c_qr2'),{labels:wl,series:[{name:'Quick Ratio',color:'--accent',data:QR.map(v=>+v.toFixed(2))}],yFmt:v=>(+v).toFixed(1),ymax:2});
+  }
+  if(TAB==='wk'){
+    setKpi('w1',fmt(SUM([last(M.sessW),last(M.sessM),last(M.sessm)])),2.4,M.sessW.map((v,i)=>v+M.sessM[i]+M.sessm[i]),'--accent');
+    setKpi('w2','31%',0.6,[27,28,28,29,29,29,30,30,30,31,31,31],'--accent');
+    setKpi('w3','1.6 天',null,null,null);
+    setKpi('w4','38%',1.1,[31,32,33,34,34,35,36,36,37,37,38,38],'--accent');
+    stackChart(document.getElementById('c_mix'),{labels:wl,series:[
+      {name:'大课',color:'--seq6',data:M.sessW},{name:'短课',color:'--seq4',data:M.sessM},{name:'微课',color:'--seq2',data:M.sessm}]});
+    barH(document.getElementById('c_comp'),{labels:['大课','短课','微课'],vals:[68,76,91],color:'--seq4',max:100});
+  }
+  if(TAB==='mem'){
+    setKpi('m1',fmt(last(M.proPaid)),wow(M.proPaid),M.proPaid,'--propaid');
+    const pen=(last(M.proGift)+last(M.proPaid))/last(M.cum)*100;
+    setKpi('m2',pen.toFixed(0)+'%',null,null,null);
+    setKpi('m3',(last(M.proPaid)/last(M.cum)*100).toFixed(1)+'%',0.3,M.proPaid.map((v,i)=>v/M.cum[i]*100),'--propaid');
+    setKpi('m4','4.2%',0.4,[3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9,4.0,4.1,4.2],'--accent');
+    stackChart(document.getElementById('c_mem2'),{labels:wl,series:[
+      {name:'Plus',color:'--plus',data:M.plus},{name:'Pro 赠送',color:'--progift',data:M.proGift},
+      {name:'Pro 付费',color:'--propaid',data:M.proPaid}]});
+    barH(document.getElementById('c_gift'),{labels:GIFT.labels,vals:GIFT.conv,color:'--propaid',max:50,
+      note:GIFT.n.map(n=>fmt(n)+' 到期')});
+    (function(){const host=document.getElementById('c_quota');host.innerHTML='';
+      const W=host.clientWidth||520,H=180,pl=40,pr=10,pt=8,pb=40,n=AIH.labels.length;
+      const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:'100%',height:H,role:'img'},host);
+      const gw=(W-pl-pr)/n, bw=Math.min(22,gw/2-4), mx=45;
+      for(let g=0;g<=3;g++){const gy=pt+(H-pt-pb)*g/3;
+        el('line',{x1:pl,x2:W-pr,y1:gy,y2:gy,stroke:cvar('--grid')},svg);
+        el('text',{x:pl-5,y:gy+4,'text-anchor':'end','font-size':10,fill:cvar('--muted')},svg).textContent=Math.round(mx-mx*g/3)+'%';}
+      AIH.labels.forEach((l,i)=>{
+        const cx=pl+gw*(i+.5);
+        [['plus','--plus',AIH.plus[i],-1],['pro','--propaid',AIH.pro[i],1]].forEach(b=>{
+          const h2=(H-pt-pb)*b[2]/mx;
+          const rc=el('rect',{x:cx+(b[3]<0?-bw-1:1),y:H-pb-h2,width:bw,height:h2,rx:4,fill:cvar(b[1])},svg);
+          rc.addEventListener('mousemove',ev=>showTT(`<b>${l} · ${b[0]==='plus'?'Plus':'Pro'}</b><div class="row"><span class="v">${b[2]}% 的账号</span></div>`,ev.clientX,ev.clientY));
+          rc.addEventListener('mouseleave',hideTT);});
+        el('text',{x:cx,y:H-pb+14,'text-anchor':'middle','font-size':10,fill:cvar('--muted')},svg).textContent=l;});
+      el('text',{x:pl,y:H-6,'font-size':10.5,fill:cvar('--muted')},svg).textContent='当期 AI 时长用量 / 配额';
+    })();
+  }
+  if(TAB==='dev'){
+    setKpi('d1','74%',-0.8,[78,78,77,77,76,76,76,75,75,75,74,74],'--accent');
+    setKpi('d2','95.4%',0.2,[94.5,94.6,94.8,94.9,95,95,95.1,95.2,95.2,95.3,95.4,95.4],'--accent');
+    setKpi('d3','49%',null,[5,14,26,38,44,47,49],'--accent');
+    setKpi('d4','0.9%',0.1,[0.6,0.6,0.7,0.7,0.7,0.8,0.8,0.8,0.9,0.9,0.9,0.9],'--accent');
+    barH(document.getElementById('c_fw'),{labels:FW.labels,vals:FW.vals,color:'--seq4',max:60});
+    barH(document.getElementById('c_delay'),{labels:DELAY.labels,vals:DELAY.vals,color:'--seq4',max:70});
+  }
+}
+document.getElementById('plSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#plSeg button').forEach(x=>x.classList.toggle('on',x===b));
+  PL=b.dataset.pl; render();
+});
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  TAB=b.dataset.t; render();
+});
+addEventListener('resize',()=>render());
+render();
+</script>

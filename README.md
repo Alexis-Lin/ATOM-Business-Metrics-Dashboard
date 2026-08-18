@@ -10,4 +10,4 @@ Atom（智能硬件 + 软件订阅）商业业绩指标体系与数据看板。
 
 ## 当前状态
 
-核心口径已对齐（v0.2 决议记录见框架文档 §1），余项 R1–R8 确认后输出指标字典 v1（含 SQL 口径）。
+三轮口径对齐完成，数据字典 v1.0 已发布；余项 R11–R15（见字典附录）确认后进入 dbt 落地。账号字段对齐 ATOM-UserGoalPreference-and-OnBoarding 仓（user_id / account_edition / devices[] / membership_tier）。
