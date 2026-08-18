@@ -9,7 +9,7 @@
       "a3": "应用活跃：任一 App 会话（任意 app_category）",
       "a4": "训练活跃：≥1 次有效训练（仅 PHYSICAL 类）"
     },
-    "qualified_workout": "PHYSICAL 类会话中 完成组数 ≥ 60% × 应练组数（planned_set_cnt）；组数不可判定时按 实际时长 ≥ 60% × 课程时长 兜底（D48，取代旧 ≥1 组或 ≥60s 低门槛）",
+    "qualified_workout": "PHYSICAL 类会话中 完成 ≥1 完整组 OR duration_sec ≥ 60（D50 确认维持低门槛；质量靠 TRN09/TRN03/TRN10 分层）",
     "workout_length_type": { "mini": "短练 <5min", "short": "小课 5–15min（含两端）", "long": "长课 >15min" },
     "app_category": ["PHYSICAL", "DESK", "AMBIENT"],
     "ratio_suffix": "R = 绝对值 ÷ ACT02（同时点已激活账号）",
