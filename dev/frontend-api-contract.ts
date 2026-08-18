@@ -119,10 +119,22 @@ export interface TrainingResponse {
   workouts: MetricSeries;            // TRN01 有效训练次数（PV）
   minutes: MetricSeries;             // TRN03 训练分钟
   sets: MetricSeries;                // TRN05 完整组数
-  lengthTypeMix: Array<{             // TRN08：按 workout_length_type 拆分
+  lengthTypeMix: Array<{             // TRN08：按 workout_length_type 拆分（① 基础结构）
     type: WorkoutLengthType;
     series: MetricSeries;
   }>;
+  /** ② 组数（D45）：训练组数（应练，折算口径 R22）/ 完成组数 / 组完成率 */
+  sets: {
+    planned: MetricSeries;           // TRN21
+    completed: MetricSeries;         // TRN22
+    completionRate: MetricSeries;    // TRN10 = TRN22 ÷ TRN21
+  };
+  /** ③ 真实时长（D45）：人均实际/AI 训练时长 + 分布（分布是主读数） */
+  realDuration: {
+    perUserMinutes: MetricSeries;    // TRN20（分母 = 周训练活跃账号）
+    aiPerUserMinutes: MetricSeries;  // TRN23（ai_active_sec）
+    distribution: Array<{ bucket: '<15' | '15-30' | '30-60' | '60-120' | '>=120'; share: number }>; // TRN24
+  };
   perApp: Array<{                    // TRN19 分应用统计
     appId: string;
     appName: string;

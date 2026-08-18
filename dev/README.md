@@ -1,6 +1,6 @@
 # dev/ — 工程开发对接目录
 
-前端（Web）与后端（数仓/埋点）开发所需的全部工程文件都在这一个目录里。口径以 [`../docs/atom-data-dictionary.md`](../docs/atom-data-dictionary.md)（v2.0）为唯一标准（SSOT），本目录是它的机器可读与代码参考形态。
+前端（Web）与后端（数仓/埋点）开发所需的全部工程文件都在这一个目录里。口径以 [`../docs/atom-data-dictionary.md`](../docs/atom-data-dictionary.md)为唯一标准（SSOT，版本以文档头为准），本目录是它的机器可读与代码参考形态。
 
 ## 文件一览（共 6 个）
 

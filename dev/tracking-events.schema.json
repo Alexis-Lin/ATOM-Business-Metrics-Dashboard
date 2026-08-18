@@ -143,7 +143,9 @@
             "content_id": { "type": ["string", "null"] },
             "workout_length_type": { "$ref": "#/$defs/workout_length_type" },
             "completion_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 100, "description": "课程完成度百分比（按课程结构进度，非纯时长比）。完课阈值当前占位 70%（R20 待定）" },
-            "sets_completed": { "type": ["integer", "null"], "minimum": 0, "description": "本会话完整组数（与 set_completed 事件对账）" },
+            "sets_completed": { "type": ["integer", "null"], "minimum": 0, "description": "本会话完整组数（与 set_completed 事件对账）→ TRN22" },
+            "planned_set_cnt": { "type": ["integer", "null"], "minimum": 0, "description": "本课结构组数快照（= dim_content.set_count）→ TRN21 应练组数折算（R22）" },
+            "ai_active_sec": { "type": ["integer", "null"], "minimum": 0, "description": "开启 AI 识别跟练的时长（秒）→ TRN23 AI 训练时长；会员 AI 时长权益用量的基础" },
             "end_reason": { "type": ["string", "null"], "enum": ["finished", "user_quit", "timeout", "crash", null] }
           }
         }

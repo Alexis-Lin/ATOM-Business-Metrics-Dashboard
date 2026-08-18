@@ -111,7 +111,9 @@ CREATE TABLE fct_session (                -- A3/A4 依据：session_start+end �
   end_ts              TIMESTAMP,
   pt_date             DATE        NOT NULL,        -- 归属日 = start_ts 的 PT 日
   duration_sec        INTEGER,
-  sets_completed      INTEGER     NOT NULL DEFAULT 0,   -- 与 fct_set_completed 对账
+  sets_completed      INTEGER     NOT NULL DEFAULT 0,   -- 与 fct_set_completed 对账 → TRN22
+  planned_set_cnt     INTEGER,                         -- 应练组数快照 = dim_content.set_count → TRN21（R22 折算口径）
+  ai_active_sec       INTEGER     NOT NULL DEFAULT 0,  -- 开启 AI 识别跟练的时长 → TRN23
   completion_pct      NUMERIC(5,2),                -- 完课阈值占位 70%（R20）
   is_qualified_workout BOOLEAN    NOT NULL DEFAULT FALSE,
       -- 有效训练判定（仅 PHYSICAL）：sets_completed >= 1 OR duration_sec >= 60
@@ -175,8 +177,10 @@ CREATE TABLE agg_user_daily (
   physical_session_cnt INTEGER NOT NULL DEFAULT 0,
   desk_session_cnt INTEGER NOT NULL DEFAULT 0,     -- → ENG16 DESK 曲线
   desk_minutes     INTEGER NOT NULL DEFAULT 0,     -- → ENG17 桌面参与分钟（阈值 R19）
-  set_cnt          INTEGER NOT NULL DEFAULT 0,
-  train_minutes    INTEGER NOT NULL DEFAULT 0,
+  set_cnt          INTEGER NOT NULL DEFAULT 0,     -- 完成组数 → TRN22
+  planned_set_cnt  INTEGER NOT NULL DEFAULT 0,     -- 应练组数（折算）→ TRN21
+  train_minutes    INTEGER NOT NULL DEFAULT 0,     -- 实际训练分钟 → TRN20/24
+  ai_train_minutes INTEGER NOT NULL DEFAULT 0,     -- AI 跟练分钟 → TRN23
   mini_workout_cnt  INTEGER NOT NULL DEFAULT 0,    -- 按 workout_length_type 的有效训练拆分
   short_workout_cnt INTEGER NOT NULL DEFAULT 0,    --   mini 短练 / short 小课 / long 长课
   long_workout_cnt  INTEGER NOT NULL DEFAULT 0,
@@ -431,6 +435,38 @@ SELECT s.pt_date, s.app_id, a.app_category,
 FROM fct_session s JOIN dim_app a ON a.app_id = s.app_id
 WHERE s.account_edition = :edition AND s.pt_date BETWEEN :start_date AND :end_date
 GROUP BY s.pt_date, s.app_id, a.app_category;
+
+-- TRN21/22/10 组数与组完成率（周粒度，仅 PHYSICAL）
+SELECT DATE_TRUNC('week', pt_date) AS iso_week,
+       SUM(planned_set_cnt)                            AS trn21_planned_sets,
+       SUM(set_cnt)                                    AS trn22_completed_sets,
+       SUM(set_cnt)::NUMERIC / NULLIF(SUM(planned_set_cnt),0) AS trn10_set_completion
+FROM agg_user_daily
+WHERE account_edition = :edition AND pt_date BETWEEN :start_date AND :end_date
+GROUP BY 1;
+
+-- TRN20/23 周人均实际时长与 AI 训练时长（分母 = 周训练活跃账号）
+SELECT DATE_TRUNC('week', pt_date) AS iso_week,
+       SUM(train_minutes)::NUMERIC    / NULLIF(COUNT(DISTINCT CASE WHEN a4_workout_active THEN user_id END),0) AS trn20_min_per_user,
+       SUM(ai_train_minutes)::NUMERIC / NULLIF(COUNT(DISTINCT CASE WHEN a4_workout_active THEN user_id END),0) AS trn23_ai_min_per_user
+FROM agg_user_daily
+WHERE account_edition = :edition AND pt_date BETWEEN :start_date AND :end_date
+GROUP BY 1;
+
+-- TRN24 周人均时长分布（本周，基数 = 周训练活跃账号）
+SELECT bucket, COUNT(*) AS accounts
+FROM (
+  SELECT user_id,
+         CASE WHEN SUM(train_minutes) < 15  THEN '<15'
+              WHEN SUM(train_minutes) < 30  THEN '15-30'
+              WHEN SUM(train_minutes) < 60  THEN '30-60'
+              WHEN SUM(train_minutes) < 120 THEN '60-120'
+              ELSE '>=120' END AS bucket
+  FROM agg_user_daily
+  WHERE account_edition = :edition AND pt_date BETWEEN :week_start AND :week_end
+  GROUP BY user_id
+  HAVING BOOL_OR(a4_workout_active)
+) t GROUP BY bucket;
 
 -- ---------------------------------------------------------------------------
 -- 6) DEV 设备健康
